@@ -1,0 +1,82 @@
+Command Line Arguments:
+     dir = uploaded_images/ 
+    arch = alexnet 
+ dogfile = dognames.txt
+** Warning: Key= Labradoodle_02.jpg already exists in results_dic with value = ['labradoodle']
+
+Pet Image Label Dictionary has 7 key-value pairs.
+Below are 7 of them:
+ 1 key:       american_Bullfrog_01.jpg  label:          american bullfrog
+ 2 key:         German_Shepherd_02.jpg  label:            german shepherd
+ 3 key:              Black_bear_01.jpg  label:                 black bear
+ 4 key:         German_Shepherd_01.jpg  label:            german shepherd
+ 5 key:      Steel_Round_Bucket_01.jpg  label:         steel round bucket
+ 6 key:             Labradoodle_01.jpg  label:                labradoodle
+ 7 key:             Labradoodle_02.jpg  label:                labradoodle
+
+     MATCH:
+
+             Black_bear_01.jpg: 
+Real:                 black bear   Classifier: american black bear, black bear, ursus americanus, euarctos americanus
+
+ NOT A MATCH:
+
+      american_Bullfrog_01.jpg: 
+Real:          american bullfrog   Classifier:     bullfrog, rana catesbeiana
+
+        German_Shepherd_02.jpg: 
+Real:            german shepherd   Classifier:                       malinois
+
+        German_Shepherd_01.jpg: 
+Real:            german shepherd   Classifier:                       malinois
+
+     Steel_Round_Bucket_01.jpg: 
+Real:         steel round bucket   Classifier:                   bucket, pail
+
+            Labradoodle_01.jpg: 
+Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
+
+            Labradoodle_02.jpg: 
+Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
+
+# Total Images 7 # Matches: 1 # NOT Matches: 6
+
+     MATCH:
+
+             Black_bear_01.jpg: 
+Real:                 black bear   Classifier: american black bear, black bear, ursus americanus, euarctos americanus  
+PetLabelDog: 0  ClassLabelDog: 0
+
+ NOT A MATCH:
+
+      american_Bullfrog_01.jpg: 
+Real:          american bullfrog   Classifier:     bullfrog, rana catesbeiana  
+PetLabelDog: 0  ClassLabelDog: 0
+
+        German_Shepherd_02.jpg: 
+Real:            german shepherd   Classifier:                       malinois  
+PetLabelDog: 0  ClassLabelDog: 1
+
+        German_Shepherd_01.jpg: 
+Real:            german shepherd   Classifier:                       malinois  
+PetLabelDog: 0  ClassLabelDog: 1
+
+     Steel_Round_Bucket_01.jpg: 
+Real:         steel round bucket   Classifier:                   bucket, pail  
+PetLabelDog: 0  ClassLabelDog: 0
+
+            Labradoodle_01.jpg: 
+Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog  
+PetLabelDog: 0  ClassLabelDog: 1
+
+            Labradoodle_02.jpg: 
+Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog  
+PetLabelDog: 0  ClassLabelDog: 1
+
+# Total Images 7 # Matches: 1 # NOT Matches: 6
+#DEBUG n_images - 7
+#DEBUG n_correct_dogs - 0
+#DEBUG n_dogs_img - 0
+#DEBUG n_match - 1
+#DEBUG n_correct_notdogs - 7
+#DEBUG n_correct_breed - 0
