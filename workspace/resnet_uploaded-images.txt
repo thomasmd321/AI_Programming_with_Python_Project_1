@@ -80,3 +80,24 @@ PetLabelDog: 0  ClassLabelDog: 1
 #DEBUG n_match - 3
 #DEBUG n_correct_notdogs - 7
 #DEBUG n_correct_breed - 0
+
+ ** Statistics from calculates_results_stats() function:
+N Images:  7  N Dog Images:  0  N NotDog Images:  7 
+Pct Corr dog:   0.0 Pct Corr NOTdog: 100.0  Pct Corr Breed:   0.0
+
+ ** Check Statistics - calculated from this function as a check:
+N Images:  7  N Dog Images:  0  N NotDog Images:  7 
+Pct Corr dog:   0.0 Pct Corr NOTdog:  42.9  Pct Corr Breed:   0.0
+
+
+*** Results Summary for CNN Model Architecture RESNET ***
+N Images            :   7
+N Dog Images        :   0
+N Not-Dog Images    :   7
+*** Results Statistics for CNN Model Architecture RESNET *** 
+pct_match: 42.86 %
+pct_correct_dogs: 0.00 %
+pct_correct_breed: 0.00 %
+pct_correct_notdogs: 100.00 %
+
+** Total Elapsed Runtime: 0:0:1
