@@ -80,8 +80,7 @@ def calculates_results_stats(results_dic):
     results_stats_dic['n_correct_breed'] = 0       
     
     # process through the results dictionary
-    for key in results_dic:
-         
+    for key in results_dic:         
         # Labels Match Exactly
         #print("#DEBUG results_dic[key][2] == 1 - {}".format(results_dic[key][2]))
         if results_dic[key][2] == 1:
@@ -89,7 +88,6 @@ def calculates_results_stats(results_dic):
         #print("#DEBUG results_dic[key][3] == 1 - {}".format(results_dic[key][3]))
         #print("#DEBUG results_dic[key][0] == 1 - {}".format(results_dic[key][0]))
         #print("#DEBUG results_dic[key][1] == 1 - {}".format(results_dic[key][1]))
-        #if (results_dic[key][3] == 1) and (results_dic[key][0] ==  results_dic[key][1]): # NOTE wording in hint seems off
         if results_dic[key][3] == 1 and results_dic[key][0] in results_dic[key][1]:
             results_stats_dic['n_correct_breed'] += 1
         # Pet Image Label is a Dog - counts number of dog images
@@ -117,15 +115,16 @@ def calculates_results_stats(results_dic):
     
     # Calculates % correct dogs
     #results_stats_dic['pct_correct_dogs'] = 0.0
-    print("#DEBUG n_images - {}".format(results_stats_dic['n_images'] ))
-    print("#DEBUG n_correct_dogs - {}".format(results_stats_dic['n_correct_dogs']))##
-    print("#DEBUG n_dogs_img - {}".format(results_stats_dic['n_dogs_img']))###
-    print("#DEBUG n_match - {}".format(results_stats_dic['n_match']))
-    print("#DEBUG n_correct_notdogs - {}".format(results_stats_dic['n_correct_notdogs']))
-    print("#DEBUG n_correct_breed - {}".format(results_stats_dic['n_correct_breed']))  ##  
+    #print("#DEBUG n_images - {}".format(results_stats_dic['n_images'] ))
+    #print("#DEBUG n_correct_dogs - {}".format(results_stats_dic['n_correct_dogs']))##
+    #print("#DEBUG n_dogs_img - {}".format(results_stats_dic['n_dogs_img']))###
+    #print("#DEBUG n_match - {}".format(results_stats_dic['n_match']))
+    #print("#DEBUG n_correct_notdogs - {}".format(results_stats_dic['n_correct_notdogs']))
+    #print("#DEBUG n_correct_breed - {}".format(results_stats_dic['n_correct_breed']))  ##  
     try:
         results_stats_dic['pct_correct_dogs'] = (results_stats_dic['n_correct_dogs'] / results_stats_dic['n_dogs_img']) * 100.0
     except ZeroDivisionError:
+        print("#Debug ZeroDivisionError pervented")
         results_stats_dic['pct_correct_dogs'] = 0.0
     
     # Calculates % correct breed of dog
@@ -134,6 +133,7 @@ def calculates_results_stats(results_dic):
         results_stats_dic['pct_correct_breed'] = (results_stats_dic['n_correct_breed'] / results_stats_dic['n_dogs_img']) * 100.0
     except ZeroDivisionError:
         results_stats_dic['pct_correct_breed'] = 0.0
+        print("#Debug ZeroDivisionError pervented")
         #print("*DEBUG n_dogs_img: {}".format(results_stats_dic['n_dogs_img']))
     
     # Calculates % correct not-a-dog images
@@ -143,6 +143,7 @@ def calculates_results_stats(results_dic):
                                                 results_stats_dic['n_notdogs_img'])*100.0
     else:
         results_stats_dic['pct_correct_notdogs'] = 0.0
+        print("#Debug ZeroDivisionError pervented")
 
     # Replace None with the results_stats_dic dictionary that you created with 
     # this function 

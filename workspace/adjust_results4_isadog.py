@@ -4,7 +4,7 @@
 #                                                                             
 # PROGRAMMER: Thomas Stewart
 # DATE CREATED: April 22, 2020                                
-# REVISED DATE: 
+# REVISED DATE: May 1, 2020
 # PURPOSE: Create a function adjust_results4_isadog that adjusts the results 
 #          dictionary to indicate whether or not the pet image label is of-a-dog, 
 #          and to indicate whether or not the classifier image label is of-a-dog.
@@ -67,37 +67,44 @@ def adjust_results4_isadog(results_dic, dogfile):
     Returns:
            None - results_dic is mutable data type so no return needed.
     """           
-    #None
     dognames_dic = dict()
+    #print("DEBUG dognames_dic dict length: {}".format(len(dognames_dic)))
     # Reads in dognames from file, 1 name per line & automatically closes file
-    with open(dogfile, "r") as infile:
-        # Reads in dognames from first line in file
-        line = infile.readline()
+    with open(dogfile, "r") as infile:    
+        line = infile.readline() 
         #print("#DEBUG line read: {}".format(line))
         while line != "":
             line = line.rstrip('\n')
             #print("#DEBUG line read: {}".format(line))
-            if bool(dognames_dic):
-                for key in list(dognames_dic):  # Review later for improvement fixes RuntimeError: dictionary changed size during iteration
-                    #print("#DEBUG for key in dognames_dic: key{}".format(key))
-                    if key != line:
+            if len(dognames_dic) > 0:
+                if line not in dognames_dic:
                         dognames_dic[line] = 1
-                        #dognames_dic.update(line = 1 )
+                if ',' in line: # multiple dog names associated with that breed
+                    temp_keys=line.split(',')
+                    for sub_key in temp_keys:
+                        sub_key = sub_key.lstrip()
+                        if sub_key not in dognames_dic:
+                            dognames_dic[sub_key] = 1
+                            #print("#DEBUG {} added to dognames_dic".format(sub_key))
+                        else:
+                            print("Key is already in dognames_dic {}".format(sub_key))
+                    
+                else:
+                    if line not in dognames_dic:
+                        dognames_dic[line] = 1
                     else:
-                        print("Key is already in dognames_dic {}".format(key))  
+                        print("Key is already in dognames_dic {}".format(line))  
             else: #dic empty
                 dognames_dic[line] = 1
-            line = infile.readline()
-    #print("#DEBUG# dognames_dic: {}".format(dognames_dic))
+            line = infile.readline()# get next line
+    #print("\\n#DEBUG# Finished dic - dognames_dic: {}".format(dognames_dic))
     for key in results_dic:     
         if results_dic[key][0] in dognames_dic:
-            #print("#Debug# first if entered")
             if results_dic[key][1] in dognames_dic:
                 results_dic[key].extend((1, 1))
             else:
                 results_dic[key].extend((1, 0))
         else:
-            #print("#Debug# first else entered")
             if results_dic[key][1] in dognames_dic:
                 results_dic[key].extend((0, 1))
             else:

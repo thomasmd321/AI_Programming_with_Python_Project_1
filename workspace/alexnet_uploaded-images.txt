@@ -4,20 +4,28 @@ Command Line Arguments:
  dogfile = dognames.txt
 ** Warning: Key= Labradoodle_02.jpg already exists in results_dic with value = ['labradoodle']
 
-Pet Image Label Dictionary has 7 key-value pairs.
-Below are 7 of them:
+Pet Image Label Dictionary has 9 key-value pairs.
+Below are 9 of them:
  1 key:       american_Bullfrog_01.jpg  label:          american bullfrog
  2 key:         German_Shepherd_02.jpg  label:            german shepherd
  3 key:              Black_bear_01.jpg  label:                 black bear
  4 key:         German_Shepherd_01.jpg  label:            german shepherd
- 5 key:      Steel_Round_Bucket_01.jpg  label:         steel round bucket
- 6 key:             Labradoodle_01.jpg  label:                labradoodle
- 7 key:             Labradoodle_02.jpg  label:                labradoodle
+ 5 key:                     dog_01.jpg  label:                        dog
+ 6 key:                     dog_02.jpg  label:                        dog
+ 7 key:      Steel_Round_Bucket_01.jpg  label:         steel round bucket
+ 8 key:             Labradoodle_01.jpg  label:                labradoodle
+ 9 key:             Labradoodle_02.jpg  label:                labradoodle
 
      MATCH:
 
              Black_bear_01.jpg: 
 Real:                 black bear   Classifier: american black bear, black bear, ursus americanus, euarctos americanus
+
+                    dog_01.jpg: 
+Real:                        dog   Classifier: tibetan terrier, chrysanthemum dog
+
+                    dog_02.jpg: 
+Real:                        dog   Classifier: tibetan terrier, chrysanthemum dog
 
  NOT A MATCH:
 
@@ -39,13 +47,199 @@ Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum do
             Labradoodle_02.jpg: 
 Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
 
-# Total Images 7 # Matches: 1 # NOT Matches: 6
+# Total Images 9 # Matches: 3 # NOT Matches: 6
+Key is already in dognames_dic japanese spaniel
+Key is already in dognames_dic shih-tzu
+Key is already in dognames_dic blenheim spaniel
+Key is already in dognames_dic papillon
+Key is already in dognames_dic toy terrier
+Key is already in dognames_dic rhodesian ridgeback
+Key is already in dognames_dic beagle
+Key is already in dognames_dic bluetick
+Key is already in dognames_dic black-and-tan coonhound
+Key is already in dognames_dic english foxhound
+Key is already in dognames_dic redbone
+Key is already in dognames_dic irish wolfhound
+Key is already in dognames_dic italian greyhound
+Key is already in dognames_dic whippet
+Key is already in dognames_dic weimaraner
+Key is already in dognames_dic bedlington terrier
+Key is already in dognames_dic border terrier
+Key is already in dognames_dic kerry blue terrier
+Key is already in dognames_dic irish terrier
+Key is already in dognames_dic norfolk terrier
+Key is already in dognames_dic norwich terrier
+Key is already in dognames_dic yorkshire terrier
+Key is already in dognames_dic wire-haired fox terrier
+Key is already in dognames_dic lakeland terrier
+Key is already in dognames_dic australian terrier
+Key is already in dognames_dic miniature schnauzer
+Key is already in dognames_dic giant schnauzer
+Key is already in dognames_dic soft-coated wheaten terrier
+Key is already in dognames_dic west highland white terrier
+Key is already in dognames_dic flat-coated retriever
+Key is already in dognames_dic curly-coated retriever
+Key is already in dognames_dic golden retriever
+Key is already in dognames_dic labrador retriever
+Key is already in dognames_dic chesapeake bay retriever
+Key is already in dognames_dic german shorthaired pointer
+Key is already in dognames_dic english setter
+Key is already in dognames_dic gordon setter
+Key is already in dognames_dic brittany spaniel
+Key is already in dognames_dic welsh springer spaniel
+Key is already in dognames_dic sussex spaniel
+Key is already in dognames_dic irish water spaniel
+Key is already in dognames_dic kuvasz
+Key is already in dognames_dic schipperke
+Key is already in dognames_dic groenendael
+Key is already in dognames_dic malinois
+Key is already in dognames_dic briard
+Key is already in dognames_dic kelpie
+Key is already in dognames_dic komondor
+Key is already in dognames_dic collie
+Key is already in dognames_dic border collie
+Key is already in dognames_dic rottweiler
+Key is already in dognames_dic miniature pinscher
+Key is already in dognames_dic greater swiss mountain dog
+Key is already in dognames_dic bernese mountain dog
+Key is already in dognames_dic appenzeller
+Key is already in dognames_dic entlebucher
+Key is already in dognames_dic boxer
+Key is already in dognames_dic bull mastiff
+Key is already in dognames_dic tibetan mastiff
+Key is already in dognames_dic french bulldog
+Key is already in dognames_dic great dane
+Key is already in dognames_dic siberian husky
+Key is already in dognames_dic basenji
+Key is already in dognames_dic leonberg
+Key is already in dognames_dic great pyrenees
+Key is already in dognames_dic pomeranian
+Key is already in dognames_dic keeshond
+Key is already in dognames_dic brabancon griffon
+Key is already in dognames_dic corgi
+Key is already in dognames_dic toy poodle
+Key is already in dognames_dic miniature poodle
+Key is already in dognames_dic mexican hairless
+Key is already in dognames_dic affenpinscher
+Key is already in dognames_dic afghan hound
+Key is already in dognames_dic airedale terrier
+Key is already in dognames_dic akita
+Key is already in dognames_dic alaskan malamute
+Key is already in dognames_dic american eskimo dog
+Key is already in dognames_dic american foxhound
+Key is already in dognames_dic american staffordshire terrier
+Key is already in dognames_dic american water spaniel
+Key is already in dognames_dic anatolian shepherd dog
+Key is already in dognames_dic australian cattle dog
+Key is already in dognames_dic australian shepherd
+Key is already in dognames_dic basset hound
+Key is already in dognames_dic bearded collie
+Key is already in dognames_dic beauceron
+Key is already in dognames_dic belgian malinois
+Key is already in dognames_dic belgian sheepdog
+Key is already in dognames_dic belgian tervuren
+Key is already in dognames_dic bichon frise
+Key is already in dognames_dic black and tan coonhound
+Key is already in dognames_dic black russian terrier
+Key is already in dognames_dic bloodhound
+Key is already in dognames_dic bluetick coonhound
+Key is already in dognames_dic borzoi
+Key is already in dognames_dic boston terrier
+Key is already in dognames_dic bouvier des flandres
+Key is already in dognames_dic boykin spaniel
+Key is already in dognames_dic brittany
+Key is already in dognames_dic brussels griffon
+Key is already in dognames_dic bull terrier
+Key is already in dognames_dic bulldog
+Key is already in dognames_dic bullmastiff
+Key is already in dognames_dic cairn terrier
+Key is already in dognames_dic canaan dog
+Key is already in dognames_dic cane corso
+Key is already in dognames_dic cardigan welsh corgi
+Key is already in dognames_dic cavalier king charles spaniel
+Key is already in dognames_dic chinese crested
+Key is already in dognames_dic chinese shar-pei
+Key is already in dognames_dic chow chow
+Key is already in dognames_dic clumber spaniel
+Key is already in dognames_dic cocker spaniel
+Key is already in dognames_dic corgi
+Key is already in dognames_dic dachshund
+Key is already in dognames_dic dalmatian
+Key is already in dognames_dic dandie dinmont terrier
+Key is already in dognames_dic deerhound
+Key is already in dognames_dic doberman pinscher
+Key is already in dognames_dic dogue de bordeaux
+Key is already in dognames_dic english cocker spaniel
+Key is already in dognames_dic english springer spaniel
+Key is already in dognames_dic english toy spaniel
+Key is already in dognames_dic entlebucher mountain dog
+Key is already in dognames_dic field spaniel
+Key is already in dognames_dic finnish spitz
+Key is already in dognames_dic german pinscher
+Key is already in dognames_dic german shepherd dog
+Key is already in dognames_dic german wirehaired pointer
+Key is already in dognames_dic glen of imaal terrier
+Key is already in dognames_dic greyhound
+Key is already in dognames_dic havanese
+Key is already in dognames_dic ibizan hound
+Key is already in dognames_dic icelandic sheepdog
+Key is already in dognames_dic irish red and white setter
+Key is already in dognames_dic irish setter
+Key is already in dognames_dic japanese chin
+Key is already in dognames_dic leonberger
+Key is already in dognames_dic lhasa apso
+Key is already in dognames_dic lowchen
+Key is already in dognames_dic maltese
+Key is already in dognames_dic manchester terrier
+Key is already in dognames_dic mastiff
+Key is already in dognames_dic neapolitan mastiff
+Key is already in dognames_dic newfoundland
+Key is already in dognames_dic norwegian buhund
+Key is already in dognames_dic norwegian elkhound
+Key is already in dognames_dic norwegian lundehund
+Key is already in dognames_dic nova scotia duck tolling retriever
+Key is already in dognames_dic old english sheepdog
+Key is already in dognames_dic otterhound
+Key is already in dognames_dic parson russell terrier
+Key is already in dognames_dic pekingese
+Key is already in dognames_dic pembroke welsh corgi
+Key is already in dognames_dic petit basset griffon vendeen
+Key is already in dognames_dic pharaoh hound
+Key is already in dognames_dic plott
+Key is already in dognames_dic pointer
+Key is already in dognames_dic poodle
+Key is already in dognames_dic portuguese water dog
+Key is already in dognames_dic pug
+Key is already in dognames_dic saint bernard
+Key is already in dognames_dic saluki
+Key is already in dognames_dic samoyed
+Key is already in dognames_dic schnauzer
+Key is already in dognames_dic scottish terrier
+Key is already in dognames_dic sealyham terrier
+Key is already in dognames_dic shetland sheepdog
+Key is already in dognames_dic silky terrier
+Key is already in dognames_dic smooth fox terrier
+Key is already in dognames_dic staffordshire bull terrier
+Key is already in dognames_dic tibetan terrier
+Key is already in dognames_dic vizsla
+Key is already in dognames_dic walker hound
+Key is already in dognames_dic wirehaired pointing griffon
+Key is already in dognames_dic xoloitzcuintli
+Key is already in dognames_dic dog
 
      MATCH:
 
              Black_bear_01.jpg: 
 Real:                 black bear   Classifier: american black bear, black bear, ursus americanus, euarctos americanus  
 PetLabelDog: 0  ClassLabelDog: 0
+
+                    dog_01.jpg: 
+Real:                        dog   Classifier: tibetan terrier, chrysanthemum dog  
+PetLabelDog: 1  ClassLabelDog: 1
+
+                    dog_02.jpg: 
+Real:                        dog   Classifier: tibetan terrier, chrysanthemum dog  
+PetLabelDog: 1  ClassLabelDog: 1
 
  NOT A MATCH:
 
@@ -55,11 +249,11 @@ PetLabelDog: 0  ClassLabelDog: 0
 
         German_Shepherd_02.jpg: 
 Real:            german shepherd   Classifier:                       malinois  
-PetLabelDog: 0  ClassLabelDog: 1
+PetLabelDog: 1  ClassLabelDog: 1
 
         German_Shepherd_01.jpg: 
 Real:            german shepherd   Classifier:                       malinois  
-PetLabelDog: 0  ClassLabelDog: 1
+PetLabelDog: 1  ClassLabelDog: 1
 
      Steel_Round_Bucket_01.jpg: 
 Real:         steel round bucket   Classifier:                   bucket, pail  
@@ -73,31 +267,29 @@ PetLabelDog: 0  ClassLabelDog: 1
 Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog  
 PetLabelDog: 0  ClassLabelDog: 1
 
-# Total Images 7 # Matches: 1 # NOT Matches: 6
-#DEBUG n_images - 7
-#DEBUG n_correct_dogs - 0
-#DEBUG n_dogs_img - 0
-#DEBUG n_match - 1
-#DEBUG n_correct_notdogs - 7
-#DEBUG n_correct_breed - 0
+# Total Images 9 # Matches: 3 # NOT Matches: 6
 
  ** Statistics from calculates_results_stats() function:
-N Images:  7  N Dog Images:  0  N NotDog Images:  7 
-Pct Corr dog:   0.0 Pct Corr NOTdog: 100.0  Pct Corr Breed:   0.0
+N Images:  9  N Dog Images:  4  N NotDog Images:  5 
+Pct Corr dog: 100.0 Pct Corr NOTdog: 100.0  Pct Corr Breed:  50.0
 
  ** Check Statistics - calculated from this function as a check:
-N Images:  7  N Dog Images:  0  N NotDog Images:  7 
-Pct Corr dog:   0.0 Pct Corr NOTdog:  42.9  Pct Corr Breed:   0.0
+N Images:  9  N Dog Images:  4  N NotDog Images:  5 
+Pct Corr dog: 100.0 Pct Corr NOTdog:  60.0  Pct Corr Breed:  50.0
 
 
 *** Results Summary for CNN Model Architecture ALEXNET ***
-N Images            :   7
-N Dog Images        :   0
-N Not-Dog Images    :   7
+N Images            :   9
+N Dog Images        :   4
+N Not-Dog Images    :   5
 *** Results Statistics for CNN Model Architecture ALEXNET *** 
-pct_match: 14.29 %
-pct_correct_dogs: 0.00 %
-pct_correct_breed: 0.00 %
-pct_correct_notdogs: 100.00 %
+pct_match: 33.33%
+pct_correct_dogs: 100.00%
+pct_correct_breed: 50.00%
+pct_correct_notdogs: 100.00%
+
+INCORRECT Dog Breed Assignment:
+Real:            german shepherd   Classifier:                       malinois
+Real:            german shepherd   Classifier:                       malinois
 
 ** Total Elapsed Runtime: 0:0:0

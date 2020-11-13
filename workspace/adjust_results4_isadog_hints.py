@@ -72,7 +72,8 @@ def adjust_results4_isadog(results_dic, dogfile):
     # Creates dognames dictionary for quick matching to results_dic labels from
     # real answer & classifier's answer
     dognames_dic = dict()
-
+    print("DEBUG dognames_dic dict length: {}".format(len(dict)))
+    quit()
     # Reads in dognames from file, 1 name per line & automatically closes file
     with open(dogfile, "r") as infile:
         # Reads in dognames from first line in file

@@ -233,11 +233,6 @@ def check_calculating_results(results_dic, results_stats_dic):
      Nothing - just prints to console  
 
     """
-    #n_images = len(results_dic)
-    #n_pet_dog = 0
-    #n_class_cdog = 0
-    #n_class_cnotd = 0
-    #n_match_breed = 0
     if results_stats_dic is None:
         print("* Doesn't Check the Results Dictionary because 'calculates_results_stats' hasn't been defined.")
     else:

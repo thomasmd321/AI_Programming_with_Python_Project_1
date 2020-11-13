@@ -98,7 +98,7 @@ def print_results(results_dic, results_stats_dic, model,
         #% Match (optional - this includes both dogs and not-a dog)
         #DEBUG Print_results - results_stats_dic: {'n_dogs_img': 30, 'n_match': 35, 'n_correct_dogs': 30, 'n_correct_notdogs': 10, 'n_correct_breed': 28, 'n_images': 40, 'n_notdogs_img': 10, 'pct_match': 87.5, 'pct_correct_dogs': 100.0, 'pct_correct_breed': 93.33333333333333, 'pct_correct_notdogs': 100.0}
         if key.startswith('p'):
-            print("{}: {:.2f} %".format(key,(results_stats_dic[key])))
+            print("{}: {:.2f}%".format(key,(results_stats_dic[key])))
 
 
     # IF print_incorrect_dogs == True AND there were images incorrectly 
@@ -111,7 +111,6 @@ def print_results(results_dic, results_stats_dic, model,
 
         # process through results dict, printing incorrectly classified dogs
         for key in results_dic:
-
             # TODO: 6c. REPLACE pass with CODE that prints out the pet label 
             #           and the classifier label from results_dic dictionary    
             #           ONLY when the classifier function (classifier label) 
@@ -144,13 +143,11 @@ def print_results(results_dic, results_stats_dic, model,
 
         # process through results dict, printing incorrectly classified breeds
         for key in results_dic:
-
             # Pet Image Label is-a-Dog, classified as-a-dog but is WRONG breed
             if ( sum(results_dic[key][3:]) == 2 and
                 results_dic[key][2] == 0 ):
                 print("Real: {:>26}   Classifier: {:>30}".format(results_dic[key][0],
                                                           results_dic[key][1]))
- 
 
-    None
+    
                 

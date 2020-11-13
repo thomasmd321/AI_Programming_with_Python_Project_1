@@ -36,6 +36,7 @@ from classify_images import classify_images
 from adjust_results4_isadog import adjust_results4_isadog
 from calculates_results_stats import calculates_results_stats
 from print_results import print_results
+from print_model_tables import print_models_table
 
 # Main program function defined below
 def main():
@@ -119,7 +120,6 @@ def main():
     print_results(results, results_stats, in_arg.arch, True, True)
     
     # TODO 0: Measure total program runtime by collecting end time
-    #sleep(5) #REMOVE 
     end_time = time()
     
     # TODO 0: Computes overall runtime in seconds & prints it in hh:mm:ss format
@@ -128,7 +128,11 @@ def main():
           str(int((tot_time/3600)))+":"+str(int((tot_time%3600)/60))+":"
           +str(int((tot_time%3600)%60)) )
     
-
+    # Final Results Exercise
+    print_models_table()
+    print("")
+    print_models_table('alexnet_uploaded-images.txt','resnet_uploaded-images.txt','vgg_uploaded-images.txt')
+    
 # Call to main function to run the program
 if __name__ == "__main__":
     main()
