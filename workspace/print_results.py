@@ -88,3 +88,26 @@ def print_results(results_dic, results_stats_dic, model,
             if sum(results_dic[key][3:]) == 2 and results_dic[key][2] == 0:
                 print("Real: {:>26}   Classifier: {:>30}".format(
                     results_dic[key][0], results_dic[key][1]))
+
+
+def print_top_predictions(results_dic, predictions, top_k):
+    """
+    For every image whose labels don't match, prints the model's top_k guesses
+    with their confidence, to show how close the model came.
+    Parameters:
+      results_dic - the results dictionary (see print_results)
+      predictions - Dictionary with image filename as 'key' and a list of
+                    (class name, probability) tuples as 'value', most likely
+                    first (as returned by classify_images)
+      top_k - how many guesses to print per image (int)
+    Returns:
+      None - simply printing results.
+    """
+    mismatches = [key for key in results_dic if results_dic[key][2] == 0]
+    if not mismatches:
+        return
+    print("\nTop {} guesses for images whose labels don't match:".format(top_k))
+    for key in mismatches:
+        print("{} (real: {})".format(key, results_dic[key][0]))
+        for label, prob in predictions[key][:top_k]:
+            print("  {:6.2f}%  {}".format(prob * 100, label))

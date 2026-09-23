@@ -58,11 +58,11 @@ PetLabelDog: 1  ClassLabelDog: 1
 
             Labradoodle_01.jpg: 
 Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog  
-PetLabelDog: 0  ClassLabelDog: 1
+PetLabelDog: 1  ClassLabelDog: 1
 
             Labradoodle_02.jpg: 
 Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog  
-PetLabelDog: 0  ClassLabelDog: 1
+PetLabelDog: 1  ClassLabelDog: 1
 
      Steel_Round_Bucket_01.jpg: 
 Real:         steel round bucket   Classifier:                   bucket, pail  
@@ -75,30 +75,28 @@ PetLabelDog: 0  ClassLabelDog: 0
 # Total Images 7 # Matches: 1 # NOT Matches: 6
 
  ** Statistics from calculates_results_stats() function:
-N Images:  7  N Dog Images:  2  N NotDog Images:  5 
-Pct Corr dog: 100.0 Pct Corr NOTdog:  60.0  Pct Corr Breed:   0.0
+N Images:  7  N Dog Images:  4  N NotDog Images:  3 
+Pct Corr dog: 100.0 Pct Corr NOTdog: 100.0  Pct Corr Breed:   0.0
 
  ** Check Statistics - calculated from this function as a check:
-N Images:  7  N Dog Images:  2  N NotDog Images:  5 
-Pct Corr dog: 100.0 Pct Corr NOTdog:  60.0  Pct Corr Breed:   0.0
+N Images:  7  N Dog Images:  4  N NotDog Images:  3 
+Pct Corr dog: 100.0 Pct Corr NOTdog: 100.0  Pct Corr Breed:   0.0
 
 
 *** Results Summary for CNN Model Architecture ALEXNET ***
 N Images            :   7
-N Dog Images        :   2
-N Not-Dog Images    :   5
+N Dog Images        :   4
+N Not-Dog Images    :   3
 *** Results Statistics for CNN Model Architecture ALEXNET ***
 % Match             :  14.29
 % Correct Dogs      : 100.00
 % Correct Breed     :   0.00
-% Correct Not-a-Dog :  60.00
-
-INCORRECT Dog/NOT Dog Assignments:
-Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
-Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
+% Correct Not-a-Dog : 100.00
 
 INCORRECT Dog Breed Assignment:
 Real:            german shepherd   Classifier:                       malinois
 Real:            german shepherd   Classifier:                       malinois
+Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
+Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
 
 ** Total Elapsed Runtime: 0:00:00

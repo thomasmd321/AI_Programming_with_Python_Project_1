@@ -1,17 +1,23 @@
 #!/bin/sh
 # */AIPND-revision/intropyproject-classify-pet-images/run_models_batch_uploaded.sh
 #
-# PROGRAMMER: Jennifer S.
+# PROGRAMMER: Jennifer S., revised by Thomas Stewart
 # DATE CREATED: 02/08/2018
-# REVISED DATE: 02/27/2018  -
-# PURPOSE: Runs all three models to test which provides 'best' solution on the Uploaded Images.
-#          Please note output from each run has been piped into a text file.
+# REVISED DATE: September 23, 2026
+# PURPOSE: Runs every model on uploaded_images/ to test which provides the 'best' solution.
+#          Each model's output goes to <model>_uploaded-images.txt, its per-image
+#          results to <model>_uploaded-images.csv, and the comparison table is printed
+#          at the end. The Udacity project compares resnet, alexnet and vgg;
+#          resnet50 and efficientnet are extra.
 #
-# Usage: sh run_models_batch_uploaded.sh    -- will run program from commandline within Project Workspace
+# Usage: sh run_models_batch_uploaded.sh    -- run from inside workspace/
 #
-python check_images.py --dir uploaded_images/ --arch resnet  --dogfile dognames.txt > resnet_uploaded-images.txt
-python check_images.py --dir uploaded_images/ --arch alexnet --dogfile dognames.txt > alexnet_uploaded-images.txt
-python check_images.py --dir uploaded_images/ --arch vgg  --dogfile dognames.txt > vgg_uploaded-images.txt
+set -e
+for arch in resnet alexnet vgg resnet50 efficientnet; do
+    echo "Running $arch on uploaded_images/ ..."
+    python check_images.py --dir uploaded_images/ --arch "$arch" --dogfile dognames.txt \
+        --topk 3 --csv "${arch}_uploaded-images.csv" > "${arch}_uploaded-images.txt"
+done
 
-# Print the side-by-side comparison of the 3 models
+# Print the side-by-side comparison of the models
 python print_model_tables.py

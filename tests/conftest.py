@@ -15,20 +15,26 @@ sys.path.insert(0, WORKSPACE)
 @pytest.fixture
 def fake_classifier(monkeypatch):
     """
-    Replaces the classifier module with a fake whose classifier() returns
-    labels from a dict keyed by image filename. Yields (labels, calls):
-    fill in labels; calls records every (img_path, model_name) received.
-    Modules that import classifier are re-imported so they pick up the fake.
+    Replaces the classifier module with a fake whose predict()/classifier()
+    answer from a dict keyed by image filename. Yields (labels, calls): fill
+    in labels with either a class name (confidence 1.0) or a list of
+    (class name, probability) guesses; calls records every
+    (img_path, model_name) received. Modules that import classifier are
+    re-imported so they pick up the fake.
     """
     labels = {}
     calls = []
 
-    def classifier(img_path, model_name):
+    def predict(img_path, model_name, k=1):
         calls.append((img_path, model_name))
-        return labels[os.path.basename(img_path)]
+        guesses = labels[os.path.basename(img_path)]
+        if isinstance(guesses, str):
+            guesses = [(guesses, 1.0)]
+        return guesses[:k]
 
     fake = types.ModuleType("classifier")
-    fake.classifier = classifier
+    fake.predict = predict
+    fake.classifier = lambda img_path, model_name: predict(img_path, model_name)[0][0]
     monkeypatch.setitem(sys.modules, "classifier", fake)
     for name in ("classify_images", "check_images"):
         monkeypatch.delitem(sys.modules, name, raising=False)

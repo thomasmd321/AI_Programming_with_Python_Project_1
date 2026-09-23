@@ -33,6 +33,24 @@ def test_get_input_args_overrides(monkeypatch):
     assert (args.dir, args.arch, args.dogfile) == ("imgs/", "resnet", "d.txt")
 
 
+def test_get_input_args_optional_extras(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["check_images.py"])
+    args = get_input_args()
+    assert (args.topk, args.csv) == (0, None)
+
+    monkeypatch.setattr(sys, "argv", ["check_images.py", "--arch", "efficientnet",
+                                      "--topk", "3", "--csv", "out.csv"])
+    args = get_input_args()
+    assert (args.arch, args.topk, args.csv) == ("efficientnet", 3, "out.csv")
+
+
+def test_get_input_args_rejects_negative_topk(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["check_images.py", "--topk", "-1"])
+    with pytest.raises(SystemExit):
+        get_input_args()
+    assert "--topk" in capsys.readouterr().err
+
+
 def test_get_input_args_rejects_unknown_arch(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["check_images.py", "--arch", "vgg19"])
     with pytest.raises(SystemExit):
@@ -109,12 +127,28 @@ def test_classify_images_appends_label_and_match(fake_classifier, import_fresh):
     results = {"cat_01.jpg": ["cat"], "cat_02.jpg": ["cat"]}
 
     # No trailing slash: paths are built with os.path.join.
-    classify_images.classify_images("some/dir", results, "resnet")
+    predictions = classify_images.classify_images("some/dir", results, "resnet")
 
     assert results == {"cat_01.jpg": ["cat", "tabby, tabby cat", 1],
                        "cat_02.jpg": ["cat", "polecat, fitch", 0]}
+    assert predictions == {"cat_01.jpg": [("tabby, tabby cat", 1.0)],
+                           "cat_02.jpg": [("polecat, fitch", 1.0)]}
     assert sorted(calls) == [(os.path.join("some/dir", "cat_01.jpg"), "resnet"),
                              (os.path.join("some/dir", "cat_02.jpg"), "resnet")]
+
+
+def test_classify_images_keeps_top_k_guesses(fake_classifier, import_fresh):
+    labels, _ = fake_classifier
+    labels["pug_01.jpg"] = [("Boxer", 0.6), ("Pug, pug-dog", 0.3), ("Bull mastiff", 0.1)]
+    classify_images = import_fresh("classify_images")
+    results = {"pug_01.jpg": ["pug"]}
+
+    predictions = classify_images.classify_images("d", results, "vgg", top_k=2)
+
+    # The top guess is the classifier label, so this is not a match...
+    assert results["pug_01.jpg"] == ["pug", "boxer", 0]
+    # ...but the right answer is the second guess.
+    assert predictions["pug_01.jpg"] == [("boxer", 0.6), ("pug, pug-dog", 0.3)]
 
 
 # --- adjust_results4_isadog -------------------------------------------------
@@ -143,6 +177,11 @@ def test_load_dognames_splits_every_line_including_the_first(tmp_path):
     assert load_dognames(str(dogfile)) == {
         "maltese dog, maltese terrier, maltese", "maltese dog",
         "maltese terrier", "maltese", "chihuahua"}
+
+
+def test_dognames_includes_labradoodle():
+    # A labradoodle isn't an ImageNet class, but it is a dog.
+    assert "labradoodle" in load_dognames(DOGNAMES)
 
 
 def test_load_dognames_prints_nothing(capsys):

@@ -8,12 +8,13 @@
 # PURPOSE: Runs the CNN classifier on every image and records how its label
 #          compares with the pet label. For each entry in the results
 #          dictionary this appends the classifier label at index 1 and a 1/0
-#          "labels match" flag at index 2.
+#          "labels match" flag at index 2. It also returns the model's top
+#          guesses and their confidence for every image.
 ##
 import os
 import re
 
-from classifier import classifier
+from classifier import predict
 
 
 def labels_match(pet_label, classifier_label):
@@ -30,9 +31,9 @@ def labels_match(pet_label, classifier_label):
     return re.search(pattern, classifier_label) is not None
 
 
-def classify_images(images_dir, results_dic, model):
+def classify_images(images_dir, results_dic, model, top_k=1):
     """
-    Creates classifier labels with the classifier function, compares pet labels
+    Creates classifier labels with the classifier, compares pet labels
     to the classifier labels, and adds the classifier label and the comparison
     result to the results dictionary. Classifier labels are lower-cased and
     stripped so they are formatted like the pet labels.
@@ -48,15 +49,23 @@ def classify_images(images_dir, results_dic, model):
                     and classifier labels and 0 = no match between labels
       model - Indicates which CNN model architecture will be used by the
               classifier function to classify the pet images,
-              values must be either: resnet alexnet vgg (string)
+              e.g. resnet alexnet vgg (string)
+      top_k - how many of the model's most likely classes to keep (int)
     Returns:
-           None - results_dic is mutable data type so no return needed.
+      predictions - Dictionary with image filename as 'key' and a list of
+                    (lower-case class name, probability) tuples as 'value',
+                    most likely first. results_dic is updated in place.
     """
+    predictions = {}
     for key in results_dic:
-        # Classify the image, then normalize the label to match pet labels.
-        model_label = classifier(os.path.join(images_dir, key), model)
-        model_label = model_label.lower().strip()
+        guesses = predict(os.path.join(images_dir, key), model, max(top_k, 1))
+        predictions[key] = [(label.lower().strip(), prob) for label, prob in guesses]
+
+        # The top guess, normalized to match pet labels, is the classifier label.
+        model_label = predictions[key][0][0]
 
         # The pet label from the filename is the ground truth.
         truth = results_dic[key][0]
         results_dic[key].extend((model_label, int(labels_match(truth, model_label))))
+
+    return predictions
