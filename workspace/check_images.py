@@ -11,14 +11,17 @@
 #          The true identity of the pet (or object) in each image is taken from
 #          the image's filename, so the program first extracts a label from
 #          every filename and then classifies the images with the chosen CNN.
-#          Running it for each of the 3 supported architectures lets us compare
-#          which one gives the 'best' classification (see print_model_tables.py).
+#          Running it for each supported architecture lets us compare which one
+#          gives the 'best' classification (see print_model_tables.py).
 #
 # Usage:
 #      python check_images.py --dir <directory with images> --arch <model>
 #             --dogfile <file that contains dognames>
 #   Example call:
 #    python check_images.py --dir pet_images/ --arch vgg --dogfile dognames.txt
+#   Optional extras:
+#      --topk 3              show the top 3 guesses for mismatched images
+#      --csv results.csv     save one row per image to a CSV file
 ##
 import logging
 from time import time
@@ -39,7 +42,8 @@ from get_pet_labels import get_pet_labels
 from classify_images import classify_images
 from adjust_results4_isadog import adjust_results4_isadog
 from calculates_results_stats import calculates_results_stats
-from print_results import print_results
+from print_results import print_results, print_top_predictions
+from export_results import write_results_csv
 
 
 def format_runtime(seconds):
@@ -65,7 +69,8 @@ def main():
 
     # 3. Run the CNN on every image and append the classifier label and a
     #    1/0 "labels match" flag to each entry: [pet_label, clf_label, match].
-    classify_images(in_arg.dir, results, in_arg.arch)
+    #    predictions keeps each image's top guesses and their confidence.
+    predictions = classify_images(in_arg.dir, results, in_arg.arch, top_k=max(in_arg.topk, 1))
     check_classifying_images(results)
 
     # 4. Append "pet label is a dog" and "classifier label is a dog" flags,
@@ -79,6 +84,14 @@ def main():
 
     # 6. Print the summary plus the misclassified dogs and breeds.
     print_results(results, results_stats, in_arg.arch, True, True)
+
+    # Optional extras: the model's top guesses where it got the label wrong,
+    # and a CSV of every image's results.
+    if in_arg.topk:
+        print_top_predictions(results, predictions, in_arg.topk)
+    if in_arg.csv:
+        write_results_csv(in_arg.csv, results, predictions, in_arg.arch)
+        print("\nSaved per-image results to", in_arg.csv)
 
     print("\n** Total Elapsed Runtime:", format_runtime(time() - start_time))
 

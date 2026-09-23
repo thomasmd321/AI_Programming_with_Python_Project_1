@@ -58,11 +58,11 @@ PetLabelDog: 1  ClassLabelDog: 1
 
             Labradoodle_01.jpg: 
 Real:                labradoodle   Classifier:    soft-coated wheaten terrier  
-PetLabelDog: 0  ClassLabelDog: 1
+PetLabelDog: 1  ClassLabelDog: 1
 
             Labradoodle_02.jpg: 
 Real:                labradoodle   Classifier:    soft-coated wheaten terrier  
-PetLabelDog: 0  ClassLabelDog: 1
+PetLabelDog: 1  ClassLabelDog: 1
 
      Steel_Round_Bucket_01.jpg: 
 Real:         steel round bucket   Classifier:                   bucket, pail  
@@ -75,25 +75,25 @@ PetLabelDog: 0  ClassLabelDog: 0
 # Total Images 7 # Matches: 3 # NOT Matches: 4
 
  ** Statistics from calculates_results_stats() function:
-N Images:  7  N Dog Images:  2  N NotDog Images:  5 
-Pct Corr dog: 100.0 Pct Corr NOTdog:  60.0  Pct Corr Breed: 100.0
+N Images:  7  N Dog Images:  4  N NotDog Images:  3 
+Pct Corr dog: 100.0 Pct Corr NOTdog: 100.0  Pct Corr Breed:  50.0
 
  ** Check Statistics - calculated from this function as a check:
-N Images:  7  N Dog Images:  2  N NotDog Images:  5 
-Pct Corr dog: 100.0 Pct Corr NOTdog:  60.0  Pct Corr Breed: 100.0
+N Images:  7  N Dog Images:  4  N NotDog Images:  3 
+Pct Corr dog: 100.0 Pct Corr NOTdog: 100.0  Pct Corr Breed:  50.0
 
 
 *** Results Summary for CNN Model Architecture RESNET ***
 N Images            :   7
-N Dog Images        :   2
-N Not-Dog Images    :   5
+N Dog Images        :   4
+N Not-Dog Images    :   3
 *** Results Statistics for CNN Model Architecture RESNET ***
 % Match             :  42.86
 % Correct Dogs      : 100.00
-% Correct Breed     : 100.00
-% Correct Not-a-Dog :  60.00
+% Correct Breed     :  50.00
+% Correct Not-a-Dog : 100.00
 
-INCORRECT Dog/NOT Dog Assignments:
+INCORRECT Dog Breed Assignment:
 Real:                labradoodle   Classifier:    soft-coated wheaten terrier
 Real:                labradoodle   Classifier:    soft-coated wheaten terrier
 

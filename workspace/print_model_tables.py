@@ -5,23 +5,27 @@
 # PROGRAMMER: Thomas Stewart
 # DATE CREATED: May 1, 2020
 # REVISED DATE: September 23, 2026
-# PURPOSE: Builds a side-by-side comparison table of the 3 CNN architectures
+# PURPOSE: Builds a side-by-side comparison table of the CNN architectures
 #          by reading the output files written by run_models_batch.sh
 #          (pet_images) or run_models_batch_uploaded.sh (uploaded_images).
+#          Models whose output file doesn't exist yet are left out.
 #
 # Usage: python print_model_tables.py
 ##
 import logging
 from os import path
 
+from get_input_args import ARCHITECTURES
 from print_results import COUNT_LABELS, PCT_LABELS, SUMMARY_HEADER
 
-PET_IMAGE_FILES = ('alexnet_pet-images.txt',
-                   'resnet_pet-images.txt',
-                   'vgg_pet-images.txt')
-UPLOADED_IMAGE_FILES = ('alexnet_uploaded-images.txt',
-                        'resnet_uploaded-images.txt',
-                        'vgg_uploaded-images.txt')
+
+def output_files(suffix):
+    """Output file names for every architecture, e.g. 'vgg_pet-images.txt'."""
+    return ['{}_{}.txt'.format(model, suffix) for model in ARCHITECTURES]
+
+
+PET_IMAGE_FILES = output_files('pet-images')
+UPLOADED_IMAGE_FILES = output_files('uploaded-images')
 
 # Table columns, left to right, as (statistic key, column heading).
 COLUMNS = (('pct_correct_notdogs', '% Not-a-dog Correct'),
@@ -63,21 +67,25 @@ def parse_results_file(filename):
 def print_models_table(files=PET_IMAGE_FILES):
     """
     Prints the image counts and a table of percentage statistics for each
-    model, parsed from saved check_images.py output files.
+    model, parsed from saved check_images.py output files. Files that don't
+    exist are skipped.
     Parameters:
       files - output files from check_images.py, one per model.
               Defaults to the pet_images runs.
     Returns:
-      True if the table was printed, False if any file was missing.
+      True if the table was printed, False if none of the files exist.
     """
-    missing = [f for f in files if not path.exists(f)]
-    if missing:
-        logging.warning("Can't print the model table; missing %s. "
+    existing = [f for f in files if path.exists(f)]
+    if not existing:
+        logging.warning("Can't print the model table; none of %s exist. "
                         "Run run_models_batch.sh / run_models_batch_uploaded.sh first.",
-                        ", ".join(missing))
+                        ", ".join(files))
         return False
+    missing = [f for f in files if f not in existing]
+    if missing:
+        logging.info("Leaving out models with no output file: %s", ", ".join(missing))
 
-    results = [parse_results_file(f) for f in files]
+    results = [parse_results_file(f) for f in existing]
 
     # Image counts are the same for every model, so show the first one's.
     first_stats = results[0][1]

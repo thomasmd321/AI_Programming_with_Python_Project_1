@@ -1,11 +1,14 @@
 """Tests for the printed output: print_results, print_model_tables and the
 runtime formatting in check_images."""
+import csv
 import os
+import sys
 
 import pytest
 
-from print_model_tables import parse_results_file, print_models_table
-from print_results import print_results
+from export_results import CSV_COLUMNS, write_results_csv
+from print_model_tables import PET_IMAGE_FILES, parse_results_file, print_models_table
+from print_results import print_results, print_top_predictions
 
 from conftest import WORKSPACE
 
@@ -95,10 +98,26 @@ def test_print_models_table(tmp_path, capsys):
     assert rows[1].split("|")[2].strip() == "66.67%"
 
 
-def test_print_models_table_missing_file(tmp_path, capsys, caplog):
+def test_print_models_table_skips_missing_files(tmp_path, capsys):
+    path = tmp_path / "vgg.txt"
+    write_results(path, "vgg", STATS)
+    capsys.readouterr()
+
+    assert print_models_table([str(tmp_path / "resnet50.txt"), str(path)]) is True
+    rows = [line for line in capsys.readouterr().out.splitlines() if "|" in line]
+    assert [r.split()[0] for r in rows[4:]] == ["vgg"]
+
+
+def test_print_models_table_all_files_missing(tmp_path, capsys, caplog):
     assert print_models_table([str(tmp_path / "nope.txt")]) is False
     assert capsys.readouterr().out == ""
     assert "nope.txt" in caplog.text
+
+
+def test_pet_image_files_cover_every_architecture():
+    assert PET_IMAGE_FILES == ["resnet_pet-images.txt", "alexnet_pet-images.txt",
+                               "vgg_pet-images.txt", "resnet50_pet-images.txt",
+                               "efficientnet_pet-images.txt"]
 
 
 def test_saved_output_files_parse():
@@ -119,3 +138,89 @@ def test_saved_output_files_parse():
 def test_format_runtime(fake_classifier, import_fresh, seconds, text):
     check_images = import_fresh("check_images")
     assert check_images.format_runtime(seconds) == text
+
+
+def run_check_images(monkeypatch, import_fresh, labels, image_dir, *args):
+    """Runs check_images.main() on image_dir with the fake classifier."""
+    names = [name for name in labels]
+    for name in names:
+        (image_dir / name).touch()
+    monkeypatch.setattr(sys, "argv", ["check_images.py", "--dir", str(image_dir),
+                                      "--dogfile", os.path.join(WORKSPACE, "dognames.txt"),
+                                      *args])
+    import_fresh("check_images").main()
+
+
+def test_check_images_end_to_end(fake_classifier, import_fresh, monkeypatch, tmp_path, capsys):
+    labels, _ = fake_classifier
+    labels.update({
+        "Beagle_01.jpg": [("Walker hound, Walker foxhound", 0.55), ("beagle", 0.40)],
+        "Dalmatian_01.jpg": [("dalmatian, coach dog, carriage dog", 0.97), ("pointer", 0.01)],
+        "cat_01.jpg": [("tabby, tabby cat", 0.81), ("tiger cat", 0.12)],
+    })
+    images = tmp_path / "images"
+    images.mkdir()
+    out_csv = tmp_path / "out.csv"
+
+    run_check_images(monkeypatch, import_fresh, labels, images,
+                     "--arch", "resnet50", "--topk", "2", "--csv", str(out_csv))
+    out = capsys.readouterr().out
+
+    assert "*** Results Summary for CNN Model Architecture RESNET50 ***" in out
+    assert "% Correct Breed     :  50.00" in out
+    # Top guesses are shown for the one mismatch only.
+    top = out.split("Top 2 guesses for images whose labels don't match:")[1]
+    assert "Beagle_01.jpg (real: beagle)" in top
+    assert " 40.00%  beagle" in top
+    assert "Dalmatian_01.jpg" not in top
+
+    with open(out_csv, newline="") as infile:
+        rows = list(csv.DictReader(infile))
+    assert [r["filename"] for r in rows] == ["Beagle_01.jpg", "Dalmatian_01.jpg", "cat_01.jpg"]
+    assert rows[1]["confidence"] == "0.9700"
+    assert rows[1]["labels_match"] == "1"
+
+
+def test_check_images_without_extras(fake_classifier, import_fresh, monkeypatch, tmp_path, capsys):
+    labels, _ = fake_classifier
+    labels["cat_01.jpg"] = "Polecat"
+    run_check_images(monkeypatch, import_fresh, labels, tmp_path)
+
+    out = capsys.readouterr().out
+    assert "Top " not in out and "Saved per-image results" not in out
+
+
+# --- print_top_predictions / write_results_csv -------------------------------
+
+PREDICTIONS = {
+    "a.jpg": [("dalmatian, coach dog", 0.9)],
+    "b.jpg": [("walker hound", 0.5), ("beagle", 0.3), ("basset", 0.1)],
+    "c.jpg": [("chihuahua", 0.6), ("cat", 0.2)],
+    "d.jpg": [("tabby cat", 0.7)],
+}
+
+
+def test_print_top_predictions(capsys):
+    print_top_predictions(RESULTS, PREDICTIONS, 2)
+    lines = capsys.readouterr().out.strip().splitlines()
+
+    assert lines[0] == "Top 2 guesses for images whose labels don't match:"
+    assert lines[1:4] == ["b.jpg (real: beagle)", "   50.00%  walker hound", "   30.00%  beagle"]
+    assert not any(line.startswith("a.jpg") for line in lines)
+
+
+def test_print_top_predictions_all_match(capsys):
+    print_top_predictions({"a.jpg": RESULTS["a.jpg"]}, PREDICTIONS, 3)
+    assert capsys.readouterr().out == ""
+
+
+def test_write_results_csv(tmp_path):
+    path = tmp_path / "r.csv"
+    write_results_csv(str(path), RESULTS, PREDICTIONS, "vgg")
+
+    with open(path, newline="") as infile:
+        rows = list(csv.reader(infile))
+    assert tuple(rows[0]) == CSV_COLUMNS
+    assert rows[2] == ["vgg", "b.jpg", "beagle", "walker hound", "0.5000", "0", "1", "1",
+                       "walker hound (50.0%); beagle (30.0%); basset (10.0%)"]
+    assert len(rows) == 5

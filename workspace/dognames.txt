@@ -222,3 +222,4 @@ walker hound
 wirehaired pointing griffon
 xoloitzcuintli
 dog
+labradoodle
