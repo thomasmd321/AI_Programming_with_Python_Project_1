@@ -1,0 +1,3 @@
+# Tools for the tests and CI. The tests don't need PyTorch.
+flake8==7.4.1
+pytest==9.1.1

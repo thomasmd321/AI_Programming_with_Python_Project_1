@@ -4,7 +4,7 @@
 #
 # PROGRAMMER: Thomas Stewart
 # DATE CREATED: April 21, 2020
-# REVISED DATE:
+# REVISED DATE: September 23, 2026
 # PURPOSE: Reads the program's 3 command line arguments with argparse. Any
 #          argument the user leaves out falls back to its default:
 #     1. Image Folder as --dir with default value 'pet_images/'
@@ -12,6 +12,9 @@
 #     3. Text File with Dog Names as --dogfile with default value 'dognames.txt'
 ##
 import argparse
+
+# The architectures classifier.py knows how to load.
+ARCHITECTURES = ('resnet', 'alexnet', 'vgg')
 
 
 def get_input_args():
@@ -24,14 +27,13 @@ def get_input_args():
     Returns:
      argparse.Namespace with attributes dir, arch and dogfile
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description='Classify pet images with a pretrained CNN.')
 
-    # Folder that holds the images. The trailing slash matters: other modules
-    # build image paths as image_dir + filename.
     parser.add_argument('--dir', type=str, default='pet_images/',
                         help='path to the folder of pet images')
-    # One of 'resnet', 'alexnet' or 'vgg' (the models in classifier.py).
-    parser.add_argument('--arch', type=str, default='vgg',
+    # argparse rejects anything else with a clear error message.
+    parser.add_argument('--arch', type=str, default='vgg', choices=ARCHITECTURES,
                         help='CNN model architecture to use')
     # Text file with one dog name per line, used to decide "is it a dog?".
     parser.add_argument('--dogfile', type=str, default='dognames.txt',

@@ -4,13 +4,30 @@
 #
 # PROGRAMMER: Thomas Stewart
 # DATE CREATED: April 21, 2020
-# REVISED DATE:
+# REVISED DATE: September 23, 2026
 # PURPOSE: Runs the CNN classifier on every image and records how its label
 #          compares with the pet label. For each entry in the results
 #          dictionary this appends the classifier label at index 1 and a 1/0
 #          "labels match" flag at index 2.
 ##
+import os
+import re
+
 from classifier import classifier
+
+
+def labels_match(pet_label, classifier_label):
+    """
+    Returns True when pet_label appears in classifier_label as whole words.
+    A classifier label can list several names for one breed separated by
+    commas, e.g. 'dalmatian, coach dog, carriage dog'. Matching on word
+    boundaries means 'cat' matches 'tabby, tabby cat' but not
+    'polecat, fitch, foulmart, foumart'.
+    """
+    if not pet_label:
+        return False
+    pattern = r'(?<![a-z])' + re.escape(pet_label) + r'(?![a-z])'
+    return re.search(pattern, classifier_label) is not None
 
 
 def classify_images(images_dir, results_dic, model):
@@ -19,13 +36,9 @@ def classify_images(images_dir, results_dic, model):
     to the classifier labels, and adds the classifier label and the comparison
     result to the results dictionary. Classifier labels are lower-cased and
     stripped so they are formatted like the pet labels.
-    A classifier label can list several names for one breed separated by
-    commas, e.g. 'dalmatian, coach dog, carriage dog'. A pet label counts as a
-    match when it appears anywhere in that string.
     Parameters:
       images_dir - The (full) path to the folder of images that are to be
-                   classified by the classifier function (string). Must end
-                   with a '/' because paths are built as images_dir + filename.
+                   classified by the classifier function (string)
       results_dic - Results Dictionary with 'key' as image filename and 'value'
                     as a List. Where the list will contain the following items:
                   index 0 = pet image label (string)
@@ -41,14 +54,9 @@ def classify_images(images_dir, results_dic, model):
     """
     for key in results_dic:
         # Classify the image, then normalize the label to match pet labels.
-        model_label = classifier(images_dir + key, model)
+        model_label = classifier(os.path.join(images_dir, key), model)
         model_label = model_label.lower().strip()
 
         # The pet label from the filename is the ground truth.
         truth = results_dic[key][0]
-        if truth in model_label:
-            results_dic[key].append(model_label)
-            results_dic[key].append(1)
-        else:
-            results_dic[key].append(model_label)
-            results_dic[key].append(0)
+        results_dic[key].extend((model_label, int(labels_match(truth, model_label))))

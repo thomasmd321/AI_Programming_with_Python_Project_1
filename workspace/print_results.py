@@ -4,11 +4,26 @@
 #
 # PROGRAMMER: Thomas Stewart
 # DATE CREATED: April 27, 2020
-# REVISED DATE:
+# REVISED DATE: September 23, 2026
 # PURPOSE: Prints the summary statistics for one model run and, when asked,
 #          the images whose dog / not-dog classification was wrong and the
 #          dog images whose breed was wrong.
 ##
+
+# Display names for the statistics, in print order. print_model_tables.py
+# uses these same names to read the values back out of saved output files.
+COUNT_LABELS = {
+    'n_images': 'N Images',
+    'n_dogs_img': 'N Dog Images',
+    'n_notdogs_img': 'N Not-Dog Images',
+}
+PCT_LABELS = {
+    'pct_match': '% Match',
+    'pct_correct_dogs': '% Correct Dogs',
+    'pct_correct_breed': '% Correct Breed',
+    'pct_correct_notdogs': '% Correct Not-a-Dog',
+}
+SUMMARY_HEADER = "*** Results Summary for CNN Model Architecture"
 
 
 def print_results(results_dic, results_stats_dic, model,
@@ -42,46 +57,34 @@ def print_results(results_dic, results_stats_dic, model,
     Returns:
            None - simply printing results.
     """
-    # Image counts. print_model_tables.py parses these exact lines back out
-    # of the saved output files, so keep the text unchanged.
-    print("\n\n*** Results Summary for CNN Model Architecture", model.upper(),
-          "***")
-    print("{:20}: {:3d}".format('N Images', results_stats_dic['n_images']))
-    print("{:20}: {:3d}".format('N Dog Images', results_stats_dic['n_dogs_img']))
-    print("{:20}: {:3d}".format('N Not-Dog Images', results_stats_dic['n_notdogs_img']))
+    print("\n\n{} {} ***".format(SUMMARY_HEADER, model.upper()))
+    for key, label in COUNT_LABELS.items():
+        print("{:20}: {:3d}".format(label, results_stats_dic[key]))
 
-    # Every percentage statistic (keys start with 'p').
-    print("*** Results Statistics for CNN Model Architecture {} *** ".format(model.upper()))
-    for key in results_stats_dic:
-        if key.startswith('p'):
-            print("{}: {:.2f}%".format(key, (results_stats_dic[key])))
+    print("*** Results Statistics for CNN Model Architecture {} ***".format(model.upper()))
+    for key, label in PCT_LABELS.items():
+        print("{:20}: {:6.2f}".format(label, results_stats_dic[key]))
 
     # Dog / not-dog mistakes: only printed when requested and when at least
     # one image was put on the wrong side.
     if (print_incorrect_dogs and
-        ((results_stats_dic['n_correct_dogs'] + results_stats_dic['n_correct_notdogs'])
-         != results_stats_dic['n_images'])):
+            (results_stats_dic['n_correct_dogs'] + results_stats_dic['n_correct_notdogs']
+             != results_stats_dic['n_images'])):
         print("\nINCORRECT Dog/NOT Dog Assignments:")
-
         for key in results_dic:
-            # A dog classified as not-a-dog...
-            if results_dic[key][3] == 1 and results_dic[key][4] == 0:
-                print("pet image label: {} classifier label: {}".format(
-                    results_dic[key][0], results_dic[key][1]))
-            # ...or a non-dog classified as a dog.
-            if results_dic[key][3] == 0 and results_dic[key][4] == 1:
-                print("pet image label: {} classifier label: {}".format(
+            # The two dog flags disagree: a dog called not-a-dog, or the
+            # other way round.
+            if results_dic[key][3] != results_dic[key][4]:
+                print("Real: {:>26}   Classifier: {:>30}".format(
                     results_dic[key][0], results_dic[key][1]))
 
     # Breed mistakes: only printed when requested and when some dogs were
     # recognized as dogs but given the wrong breed.
     if (print_incorrect_breed and
-        (results_stats_dic['n_correct_dogs'] != results_stats_dic['n_correct_breed'])):
+            results_stats_dic['n_correct_dogs'] != results_stats_dic['n_correct_breed']):
         print("\nINCORRECT Dog Breed Assignment:")
-
         for key in results_dic:
             # Both labels say "dog" (flags sum to 2) but the labels don't match.
-            if (sum(results_dic[key][3:]) == 2 and
-                    results_dic[key][2] == 0):
-                print("Real: {:>26}   Classifier: {:>30}".format(results_dic[key][0],
-                                                              results_dic[key][1]))
+            if sum(results_dic[key][3:]) == 2 and results_dic[key][2] == 0:
+                print("Real: {:>26}   Classifier: {:>30}".format(
+                    results_dic[key][0], results_dic[key][1]))

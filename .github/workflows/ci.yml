@@ -14,18 +14,17 @@ jobs:
         with:
           python-version: "3.11"
 
-      # PyTorch isn't installed: the tests only cover the modules that don't
-      # load the pretrained CNNs.
+      # PyTorch isn't installed: the tests stub out the classifier and
+      # torch, so they never download the pretrained CNNs.
       - name: Install tools
-        run: pip install flake8 pytest
+        run: pip install -r requirements-dev.txt
 
-      # Fail on syntax errors and undefined names only; style issues are
-      # tracked in TODO.md rather than failing the build.
+      # Full flake8 (PEP 8 + pyflakes); settings are in setup.cfg.
       - name: Lint
-        run: flake8 workspace tests --count --select=E9,F63,F7,F82 --show-source --statistics
+        run: flake8 workspace tests
 
       - name: Compile all modules
         run: python -m compileall -q workspace tests
 
       - name: Unit tests
-        run: pytest -v tests
+        run: pytest -v

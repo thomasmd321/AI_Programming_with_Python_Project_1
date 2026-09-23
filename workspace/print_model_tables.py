@@ -4,94 +4,99 @@
 #
 # PROGRAMMER: Thomas Stewart
 # DATE CREATED: May 1, 2020
-# REVISED DATE: May 2, 2020
+# REVISED DATE: September 23, 2026
 # PURPOSE: Builds a side-by-side comparison table of the 3 CNN architectures
 #          by reading the output files written by run_models_batch.sh
 #          (pet_images) or run_models_batch_uploaded.sh (uploaded_images).
 #
 # Usage: python print_model_tables.py
 ##
+import logging
 from os import path
 
+from print_results import COUNT_LABELS, PCT_LABELS, SUMMARY_HEADER
 
-def print_models_table(file1='alexnet_pet-images.txt',
-                       file2='resnet_pet-images.txt',
-                       file3='vgg_pet-images.txt'):
+PET_IMAGE_FILES = ('alexnet_pet-images.txt',
+                   'resnet_pet-images.txt',
+                   'vgg_pet-images.txt')
+UPLOADED_IMAGE_FILES = ('alexnet_uploaded-images.txt',
+                        'resnet_uploaded-images.txt',
+                        'vgg_uploaded-images.txt')
+
+# Table columns, left to right, as (statistic key, column heading).
+COLUMNS = (('pct_correct_notdogs', '% Not-a-dog Correct'),
+           ('pct_correct_dogs', '% Dogs Correct'),
+           ('pct_correct_breed', '% Breeds Correct'),
+           ('pct_match', '% Match Labels'))
+ROW_FORMAT = "{:<24} |{:<20} |{:<15} |{:<18} |{:<17}"
+
+
+def parse_results_file(filename):
+    """
+    Reads the model name and the statistics that print_results() wrote into a
+    saved check_images.py output file.
+    Parameters:
+      filename - path to the output file (string)
+    Returns:
+      (model, stats) - model name in lower case (string) and a dictionary of
+                       statistic key -> value (int for counts, float for pcts)
+    """
+    labels = {label: key for key, label in {**COUNT_LABELS, **PCT_LABELS}.items()}
+    model = None
+    stats = {}
+    with open(filename, 'r') as infile:
+        for line in infile:
+            line = line.strip()
+            # "*** Results Summary for CNN Model Architecture VGG ***"
+            if line.startswith(SUMMARY_HEADER):
+                model = line[len(SUMMARY_HEADER):].strip(' *').lower()
+                continue
+            # "% Correct Dogs      : 100.00". Only read after the header:
+            # the earlier lab-check output has similar-looking lines.
+            label, sep, value = line.partition(':')
+            if model is not None and sep and label.strip() in labels:
+                key = labels[label.strip()]
+                stats[key] = int(value) if key.startswith('n_') else float(value)
+    return model, stats
+
+
+def print_models_table(files=PET_IMAGE_FILES):
     """
     Prints the image counts and a table of percentage statistics for each
     model, parsed from saved check_images.py output files.
     Parameters:
-      file1, file2, file3 - output files from check_images.py, one per model.
-                            Defaults are the pet_images runs.
+      files - output files from check_images.py, one per model.
+              Defaults to the pet_images runs.
     Returns:
-      None - prints to the console. Returns early if any file is missing.
+      True if the table was printed, False if any file was missing.
     """
-    table_dic = {}       # model name -> list of 'pct_...' lines
-    mini_table_dic = {}  # model name -> list of 'N ... Images' lines
+    missing = [f for f in files if not path.exists(f)]
+    if missing:
+        logging.warning("Can't print the model table; missing %s. "
+                        "Run run_models_batch.sh / run_models_batch_uploaded.sh first.",
+                        ", ".join(missing))
+        return False
 
-    # All 3 output files must exist before a table can be built.
-    for check_file in (file1, file2, file3):
-        if path.exists(check_file):
-            print("file: {} Exists".format(check_file))
-        else:
-            print("Ensure both run_models_batch.sh and run_models_batch_uploaded.sh have been run")
-            print("file: {} Missing; exiting".format(check_file))
-            return
+    results = [parse_results_file(f) for f in files]
 
-    for tempfile in [file1, file2, file3]:
-        with open(tempfile, 'r') as myFile:
-            for line in myFile:
-                line = line.rstrip('\n').lstrip()
-
-                # The model name comes from the "arch = <model>" line printed
-                # near the top of each file; later lines are filed under it.
-                if 'arch =' in line:
-                    key = (line.split('=')[-1].strip())
-
-                # Image count lines, e.g. "N Dog Images        :  30".
-                if 'N Images' in line and 'N Dog Images' not in line:
-                    mini_table_dic[key] = [line]
-                if 'N Dog Images' in line and 'N Images' not in line:
-                    mini_table_dic[key].append(line)
-                if 'N Not-Dog Images' in line and 'N Dog Images' not in line:
-                    mini_table_dic[key].append(line)
-
-                # Percentage lines, e.g. "pct_match: 87.50%". pct_match is
-                # printed first, so it starts the list and the others follow
-                # in print order: [match, dogs, breed, notdogs].
-                if 'pct_correct_notdogs:' in line:
-                    table_dic[key].append(line)
-                if 'pct_correct_dogs:' in line:
-                    table_dic[key].append(line)
-                if 'pct_correct_breed:' in line:
-                    table_dic[key].append(line)
-                if 'pct_match:' in line:
-                    table_dic[key] = [line]
-
-    # Image counts are the same for every model, so show alexnet's.
-    print("{}".format(mini_table_dic['alexnet'][0].replace(':', '|')))
-    print("{}".format(mini_table_dic['alexnet'][1].replace(':', '|')))
-    print("{}".format(mini_table_dic['alexnet'][2].replace(':', '|')))
+    # Image counts are the same for every model, so show the first one's.
+    first_stats = results[0][1]
+    for key, label in COUNT_LABELS.items():
+        print("{:20}| {:3d}".format(label, first_stats[key]))
     print("")
 
-    # One row per model; the value is the text after the last ':'.
-    print("{:<24} |{:<20} |{:<15} |{:<18} |{:<17}".format(
-        'CNN model architecture', '% Not-a-dog Correct', '% Dogs Correct',
-        '% Breeds Correct', '% Match Labels'))
-    for key in table_dic:
-        print("{:<24} |{:<20} |{:<15} |{:<18} |{:<17}".format(
-            key,
-            table_dic[key][3].split(':')[-1].lstrip(),
-            table_dic[key][1].split(':')[-1].lstrip(),
-            table_dic[key][2].split(':')[-1].lstrip(),
-            table_dic[key][0].split(':')[-1].lstrip()))
+    print(ROW_FORMAT.format('CNN model architecture', *(title for _, title in COLUMNS)))
+    for model, stats in results:
+        print(ROW_FORMAT.format(model, *("{:.2f}%".format(stats[key]) for key, _ in COLUMNS)))
+    return True
 
 
-# Only print the tables when run directly. check_images.py imports this module
-# and prints the tables itself; without this guard they printed twice.
+def main():
+    print("Results for pet_images/:")
+    print_models_table(PET_IMAGE_FILES)
+    print("\nResults for uploaded_images/:")
+    print_models_table(UPLOADED_IMAGE_FILES)
+
+
 if __name__ == "__main__":
-    print_models_table()
-    print("")
-    print_models_table('alexnet_uploaded-images.txt',
-                       'resnet_uploaded-images.txt',
-                       'vgg_uploaded-images.txt')
+    main()

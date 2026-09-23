@@ -14,24 +14,47 @@ label with the CNN's prediction.
 
 ## Results
 
-Results on the 40 images in `pet_images/` (30 dogs, 10 non-dogs), taken from
-the saved `*_pet-images.txt` files:
+Results on the 40 images in `pet_images/` (30 dogs, 10 non-dogs), from the
+saved `*_pet-images.txt` files:
 
 | CNN model | % Not-a-dog correct | % Dogs correct | % Breeds correct | % Match labels |
 |-----------|--------------------:|---------------:|-----------------:|---------------:|
-| ResNet    | 100.00 | 100.00 | 90.00 | 82.50 |
+| ResNet    |  90.00 | 100.00 | 90.00 | 82.50 |
 | AlexNet   | 100.00 | 100.00 | 80.00 | 75.00 |
 | VGG       | 100.00 | 100.00 | 93.33 | 87.50 |
 
-**VGG** does best, especially at identifying breeds. *Not-a-dog correct* is
-overstated because of a known counting bug (see [TODO.md](TODO.md)).
+**VGG** does best overall: it has the highest breed and label-match accuracy,
+and, like AlexNet, it labels every non-dog correctly.
+
+Results on the 7 images in `uploaded_images/` (2 dogs, 5 non-dogs), from the
+`*_uploaded-images.txt` files:
+
+| CNN model | % Not-a-dog correct | % Dogs correct | % Breeds correct | % Match labels |
+|-----------|--------------------:|---------------:|-----------------:|---------------:|
+| ResNet    | 60.00 | 100.00 | 100.00 | 42.86 |
+| AlexNet   | 60.00 | 100.00 |   0.00 | 14.29 |
+| VGG       | 60.00 | 100.00 | 100.00 | 42.86 |
+
+The two Labradoodle photos count as "not a dog" errors. A labradoodle isn't
+in `dognames.txt` (it's not an ImageNet class), so its pet label is treated
+as not-a-dog, while every model correctly calls it a dog.
+
+> **About the saved output files:** they were regenerated after the bug
+> fixes in [TODO.md](TODO.md) by replaying the CNN labels recorded in the
+> original runs through the fixed code. The classifications and runtimes
+> come from those original runs. The old uploaded-images runs also included
+> two images (`dog_01.jpg`, `dog_02.jpg`) that were never committed, so the
+> regenerated files cover the 7 committed images.
 
 ## Project layout
 
 ```
 .
 ├── README.md
-├── TODO.md                      # List of code improvements
+├── TODO.md                      # Code improvements: done and still open
+├── requirements.txt             # Runtime dependencies (PyTorch, Pillow)
+├── requirements-dev.txt         # Test/lint tools
+├── setup.cfg                    # flake8 and pytest settings
 ├── .github/workflows/ci.yml     # CI: lint + unit tests
 ├── tests/                       # pytest tests (no PyTorch needed)
 └── workspace/
@@ -43,11 +66,11 @@ overstated because of a known counting bug (see [TODO.md](TODO.md)).
     ├── calculates_results_stats.py # 5. Computes counts and percentages
     ├── print_results.py         # 6. Prints the summary and misclassifications
     ├── print_model_tables.py    # Comparison table across the 3 models
-    ├── classifier.py            # CNN wrapper (supplied by Udacity)
+    ├── classifier.py            # CNN wrapper (Udacity, revised)
     ├── print_functions_for_lab_checks.py # Step-by-step check printers (Udacity)
     ├── test_classifier.py       # Demo of classifier() (Udacity)
-    ├── run_models_batch.sh      # Runs all 3 models on pet_images/
-    ├── run_models_batch_uploaded.sh # Runs all 3 models on uploaded_images/
+    ├── run_models_batch.sh      # Runs all 3 models on pet_images/, then prints the table
+    ├── run_models_batch_uploaded.sh # Same for uploaded_images/
     ├── dognames.txt             # Every dog name the classifier can return
     ├── imagenet1000_clsid_to_human.txt # ImageNet class index → name
     ├── pet_images/              # 40 course-supplied test images
@@ -64,7 +87,7 @@ It's keyed by image filename, and each step appends to the value list:
 |------:|----------|---------|
 | 0 | `get_pet_labels` | pet label from the filename |
 | 1 | `classify_images` | classifier label (lower case) |
-| 2 | `classify_images` | 1 if the labels match, else 0 |
+| 2 | `classify_images` | 1 if the pet label appears as whole words in the classifier label, else 0 |
 | 3 | `adjust_results4_isadog` | 1 if the pet label is a dog |
 | 4 | `adjust_results4_isadog` | 1 if the classifier label is a dog |
 
@@ -73,21 +96,20 @@ and percentages (`pct_*`), and `print_results` prints them.
 
 ## Requirements
 
-- Python 3.6+
-- [PyTorch](https://pytorch.org/) and torchvision
-- Pillow
+- Python 3.7+
+- [PyTorch](https://pytorch.org/), torchvision and Pillow
 
 ```bash
-pip install torch torchvision pillow
+pip install -r requirements.txt
 ```
 
-The pretrained weights are downloaded automatically the first time
-`classifier.py` is imported.
+Pretrained weights are downloaded automatically the first time each model is
+used. Only the model named by `--arch` is loaded.
 
 ## Usage
 
-Run every command from inside `workspace/`, because the code opens its data
-files by relative path.
+Run the commands from inside `workspace/`: the default `--dir` and
+`--dogfile` values, and the batch scripts, use paths relative to it.
 
 ```bash
 cd workspace
@@ -101,29 +123,31 @@ sh run_models_batch.sh
 # Same for your own images in uploaded_images/
 sh run_models_batch_uploaded.sh
 
-# Print the side-by-side comparison tables from the saved outputs
+# Reprint the comparison tables for both folders from the saved outputs
 python print_model_tables.py
 ```
 
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `--dir` | `pet_images/` | Image folder (keep the trailing `/`) |
+| `--dir` | `pet_images/` | Image folder (hidden and non-image files are skipped) |
 | `--arch` | `vgg` | `resnet`, `alexnet` or `vgg` |
 | `--dogfile` | `dognames.txt` | File of valid dog names |
 
 ## Tests and CI
 
-The unit tests cover the steps that don't need PyTorch (argument parsing,
-label extraction, dog flagging and statistics), so they run in under a second:
+The tests cover every pipeline step plus the printed output. The classifier
+and PyTorch are replaced by small fakes, so no weights are downloaded and the
+suite runs in under a second:
 
 ```bash
-pip install pytest
-pytest tests
+pip install -r requirements-dev.txt
+flake8 workspace tests
+pytest
 ```
 
 GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs
-flake8 (syntax errors and undefined names), compiles every module and runs
-the tests on each push and pull request.
+full flake8, compiles every module and runs the tests on each push and pull
+request.
 
 ## Branches
 

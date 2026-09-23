@@ -4,13 +4,34 @@
 #
 # PROGRAMMER: Thomas Stewart
 # DATE CREATED: April 22, 2020
-# REVISED DATE: May 1, 2020
+# REVISED DATE: September 23, 2026
 # PURPOSE: Marks, for every image, whether the pet label is a dog and whether
 #          the classifier label is a dog. A label is a dog when it appears in
 #          the dog names file (dognames.txt). The two 1/0 flags are appended
 #          to the results dictionary at index 3 (pet label) and index 4
 #          (classifier label).
 ##
+
+
+def load_dognames(dogfile):
+    """
+    Reads the dog names file into a set. Each whole line is stored, and a line
+    holding several comma-separated names for one breed (ex. 'maltese dog,
+    maltese terrier, maltese') also has each name stored on its own.
+    Parameters:
+      dogfile - path to the text file, one dog name (or name list) per line
+    Returns:
+      set of lower-case dog names
+    """
+    dognames = set()
+    with open(dogfile, "r") as infile:
+        for line in infile:
+            line = line.strip()
+            if not line:
+                continue
+            dognames.add(line)
+            dognames.update(name.strip() for name in line.split(','))
+    return dognames
 
 
 def adjust_results4_isadog(results_dic, dogfile):
@@ -43,47 +64,10 @@ def adjust_results4_isadog(results_dic, dogfile):
     Returns:
            None - results_dic is mutable data type so no return needed.
     """
-    # Load the dog names into a dictionary used as a fast lookup set. Each
-    # whole line is stored, and a line holding several comma-separated names
-    # also has each name stored on its own.
-    dognames_dic = dict()
-    with open(dogfile, "r") as infile:
-        line = infile.readline()
-        while line != "":
-            line = line.rstrip('\n')
-            if len(dognames_dic) > 0:
-                if line not in dognames_dic:
-                    dognames_dic[line] = 1
-                if ',' in line:
-                    # Several names for the same breed.
-                    temp_keys = line.split(',')
-                    for sub_key in temp_keys:
-                        sub_key = sub_key.lstrip()
-                        if sub_key not in dognames_dic:
-                            dognames_dic[sub_key] = 1
-                        else:
-                            print("Key is already in dognames_dic {}".format(sub_key))
-                else:
-                    if line not in dognames_dic:
-                        dognames_dic[line] = 1
-                    else:
-                        print("Key is already in dognames_dic {}".format(line))
-            else:
-                # First line: the dictionary is still empty, so just add it.
-                # NOTE: a first line holding comma-separated names is not
-                # split. See TODO.md.
-                dognames_dic[line] = 1
-            line = infile.readline()
+    dognames = load_dognames(dogfile)
 
     # Append (pet label is a dog, classifier label is a dog) as 1/0 flags.
     for key in results_dic:
-        if results_dic[key][0] in dognames_dic:
-            if results_dic[key][1] in dognames_dic:
-                results_dic[key].extend((1, 1))
-            else:
-                results_dic[key].extend((1, 0))
-        else:
-            if results_dic[key][1] in dognames_dic:
-                results_dic[key].extend((0, 1))
-            else:
-                results_dic[key].extend((0, 0))
+        pet_is_dog = int(results_dic[key][0] in dognames)
+        classifier_is_dog = int(results_dic[key][1] in dognames)
+        results_dic[key].extend((pet_is_dog, classifier_is_dog))

@@ -4,7 +4,7 @@
 #
 # PROGRAMMER: Thomas Stewart
 # DATE CREATED: April 23, 2020
-# REVISED DATE:
+# REVISED DATE: September 23, 2026
 # PURPOSE: Summarizes the results dictionary as counts and percentages so the
 #          CNN architectures can be compared. Keys starting with 'n_' are
 #          counts and keys starting with 'pct_' are percentages:
@@ -20,6 +20,11 @@
 #            pct_correct_breed - percentage of correctly classified dog breeds
 #            pct_correct_notdogs - percentage of correctly classified NON-dogs
 ##
+
+
+def pct(part, whole):
+    """Returns part as a percentage of whole, or 0.0 when whole is 0."""
+    return (part / whole) * 100.0 if whole else 0.0
 
 
 def calculates_results_stats(results_dic):
@@ -44,65 +49,39 @@ def calculates_results_stats(results_dic):
                      name (starting with 'pct' for percentage or 'n' for count)
                      and the value is the statistic's value.
     """
-    results_stats_dic = dict()
-
-    # Counters that are incremented while walking through results_dic.
-    results_stats_dic['n_dogs_img'] = 0
-    results_stats_dic['n_match'] = 0
-    results_stats_dic['n_correct_dogs'] = 0
-    results_stats_dic['n_correct_notdogs'] = 0
-    results_stats_dic['n_correct_breed'] = 0
+    stats = {
+        'n_dogs_img': 0,
+        'n_match': 0,
+        'n_correct_dogs': 0,
+        'n_correct_notdogs': 0,
+        'n_correct_breed': 0,
+    }
 
     for key in results_dic:
+        _, _, is_match, pet_is_dog, classifier_is_dog = results_dic[key][:5]
+
         # Pet label and classifier label match.
-        if results_dic[key][2] == 1:
-            results_stats_dic['n_match'] += 1
+        if is_match == 1:
+            stats['n_match'] += 1
 
-        # A dog image whose breed was named by the classifier.
-        if results_dic[key][3] == 1 and results_dic[key][0] in results_dic[key][1]:
-            results_stats_dic['n_correct_breed'] += 1
+        if pet_is_dog == 1:
+            stats['n_dogs_img'] += 1
+            # The classifier also said "dog"...
+            if classifier_is_dog == 1:
+                stats['n_correct_dogs'] += 1
+                # ...and named the right breed.
+                if is_match == 1:
+                    stats['n_correct_breed'] += 1
+        elif classifier_is_dog == 0:
+            # Not a dog, and the classifier agreed.
+            stats['n_correct_notdogs'] += 1
 
-        if results_dic[key][3] == 1:
-            # Pet image is a dog.
-            results_stats_dic['n_dogs_img'] += 1
-            # ...and the classifier also said "dog".
-            if results_dic[key][4] == 1:
-                results_stats_dic['n_correct_dogs'] += 1
-        else:
-            # Pet image is not a dog.
-            # NOTE: this counts every non-dog image as correct without
-            # checking the classifier flag (index 4). See TODO.md.
-            results_stats_dic['n_correct_notdogs'] += 1
+    stats['n_images'] = len(results_dic)
+    stats['n_notdogs_img'] = stats['n_images'] - stats['n_dogs_img']
 
-    # Totals derived from the counters above.
-    results_stats_dic['n_images'] = len(results_dic)
-    results_stats_dic['n_notdogs_img'] = (results_stats_dic['n_images'] -
-                                          results_stats_dic['n_dogs_img'])
+    stats['pct_match'] = pct(stats['n_match'], stats['n_images'])
+    stats['pct_correct_dogs'] = pct(stats['n_correct_dogs'], stats['n_dogs_img'])
+    stats['pct_correct_breed'] = pct(stats['n_correct_breed'], stats['n_dogs_img'])
+    stats['pct_correct_notdogs'] = pct(stats['n_correct_notdogs'], stats['n_notdogs_img'])
 
-    # Percentages. Each one falls back to 0.0 when its denominator is 0
-    # (for example a folder with no dog images).
-    results_stats_dic['pct_match'] = (results_stats_dic['n_match'] /
-                                      results_stats_dic['n_images']) * 100.0
-
-    try:
-        results_stats_dic['pct_correct_dogs'] = (results_stats_dic['n_correct_dogs'] /
-                                                 results_stats_dic['n_dogs_img']) * 100.0
-    except ZeroDivisionError:
-        print("#Debug ZeroDivisionError prevented")
-        results_stats_dic['pct_correct_dogs'] = 0.0
-
-    try:
-        results_stats_dic['pct_correct_breed'] = (results_stats_dic['n_correct_breed'] /
-                                                  results_stats_dic['n_dogs_img']) * 100.0
-    except ZeroDivisionError:
-        results_stats_dic['pct_correct_breed'] = 0.0
-        print("#Debug ZeroDivisionError prevented")
-
-    if results_stats_dic['n_notdogs_img'] > 0:
-        results_stats_dic['pct_correct_notdogs'] = (results_stats_dic['n_correct_notdogs'] /
-                                                    results_stats_dic['n_notdogs_img']) * 100.0
-    else:
-        results_stats_dic['pct_correct_notdogs'] = 0.0
-        print("#Debug ZeroDivisionError prevented")
-
-    return results_stats_dic
+    return stats
