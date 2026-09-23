@@ -1,3 +1,17 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# */AIPND-revision/intropyproject-classify-pet-images/classifier.py
+#
+# PROGRAMMER: Udacity (supplied with the project)
+# PURPOSE: Provides classifier(img_path, model_name), which runs one image
+#          through a CNN pretrained on ImageNet and returns the predicted
+#          ImageNet class name, e.g. 'Maltese dog, Maltese terrier, Maltese'.
+#          Supported model names: 'resnet', 'alexnet', 'vgg'.
+#
+# NOTE: all 3 models are downloaded/loaded when this module is imported,
+#       and the ImageNet label file is opened relative to the current working
+#       directory, so run the programs from inside workspace/.
+##
 import ast
 from PIL import Image
 import torchvision.transforms as transforms
@@ -5,21 +19,34 @@ from torch.autograd import Variable
 import torchvision.models as models
 from torch import __version__
 
+# Pretrained ImageNet models, loaded once at import time.
 resnet18 = models.resnet18(pretrained=True)
 alexnet = models.alexnet(pretrained=True)
 vgg16 = models.vgg16(pretrained=True)
 
+# Maps the --arch value to its model. (This rebinds the name 'models', so the
+# torchvision module is no longer reachable under that name below.)
 models = {'resnet': resnet18, 'alexnet': alexnet, 'vgg': vgg16}
 
-# obtain ImageNet labels
+# Obtain ImageNet labels: the file is a Python dict literal {class index: name}.
 with open('imagenet1000_clsid_to_human.txt') as imagenet_classes_file:
     imagenet_classes_dict = ast.literal_eval(imagenet_classes_file.read())
 
 def classifier(img_path, model_name):
+    """
+    Classifies one image with a pretrained CNN.
+    Parameters:
+      img_path - path to the image file (string)
+      model_name - 'resnet', 'alexnet' or 'vgg' (string)
+    Returns:
+      ImageNet class name(s) for the top prediction (string, mixed case,
+      several names separated by commas)
+    """
     # load the image
     img_pil = Image.open(img_path)
 
-    # define transforms
+    # Define transforms: the standard ImageNet preprocessing (resize, crop to
+    # 224x224, convert to a tensor, normalize with ImageNet mean/std).
     preprocess = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -68,7 +95,7 @@ def classifier(img_path, model_name):
         # apply data to model
         output = model(data)
 
-    # return index corresponding to predicted class
+    # Return the name of the highest-scoring class.
     pred_idx = output.data.numpy().argmax()
 
     return imagenet_classes_dict[pred_idx]

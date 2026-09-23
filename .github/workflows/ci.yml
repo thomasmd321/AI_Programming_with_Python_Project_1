@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # PyTorch isn't installed: the tests only cover the modules that don't
+      # load the pretrained CNNs.
+      - name: Install tools
+        run: pip install flake8 pytest
+
+      # Fail on syntax errors and undefined names only; style issues are
+      # tracked in TODO.md rather than failing the build.
+      - name: Lint
+        run: flake8 workspace tests --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Compile all modules
+        run: python -m compileall -q workspace tests
+
+      - name: Unit tests
+        run: pytest -v tests
