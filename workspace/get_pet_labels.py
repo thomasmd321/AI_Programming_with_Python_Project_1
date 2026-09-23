@@ -1,74 +1,59 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # */AIPND-revision/intropyproject-classify-pet-images/get_pet_labels.py
-#                                                                             
-# PROGRAMMER: Thomas Stewart
-# DATE CREATED: April 21, 2020                                 
-# REVISED DATE: 
-# PURPOSE: Create the function get_pet_labels that creates the pet labels from 
-#          the image's filename. This function inputs: 
-#           - The Image Folder as image_dir within get_pet_labels function and 
-#             as in_arg.dir for the function call within the main function. 
-#          This function creates and returns the results dictionary as results_dic
-#          within get_pet_labels function and as results within main. 
-#          The results_dic dictionary has a 'key' that's the image filename and
-#          a 'value' that's a list. This list will contain the following item
-#          at index 0 : pet image label (string).
 #
+# PROGRAMMER: Thomas Stewart
+# DATE CREATED: April 21, 2020
+# REVISED DATE: September 23, 2026
+# PURPOSE: Builds the pet label for every image from its filename and returns
+#          them in the results dictionary. The dictionary's key is the image
+#          filename and its value is a list whose item at index 0 is the pet
+#          image label (string). Later pipeline steps append more items.
 ##
-# Imports python modules
-from os import listdir
+import logging
+import os
 
-# TODO 2: Define get_pet_labels function below please be certain to replace None
-#       in the return statement with results_dic dictionary that you create 
-#       with this function
-# 
+# File types the classifier can open. Anything else in the folder is skipped.
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.gif'}
+
+
+def is_image_file(filename):
+    """Returns True for visible files with an image extension."""
+    if filename.startswith('.'):
+        return False
+    return os.path.splitext(filename)[1].lower() in IMAGE_EXTENSIONS
+
+
+def label_from_filename(filename):
+    """
+    Turns an image filename into a pet label: drop the extension, lower-case,
+    split on '_' and keep only the purely alphabetic words.
+    (ex. 'Boston_terrier_02259.jpg' -> 'boston terrier')
+    """
+    stem = os.path.splitext(filename)[0].lower()
+    return " ".join(word for word in stem.split("_") if word.isalpha())
+
+
 def get_pet_labels(image_dir):
     """
-    Creates a dictionary of pet labels (results_dic) based upon the filenames 
-    of the image files. These pet image labels are used to check the accuracy 
-    of the labels that are returned by the classifier function, since the 
-    filenames of the images contain the true identity of the pet in the image.
-    Be sure to format the pet labels so that they are in all lower case letters
-    and with leading and trailing whitespace characters stripped from them.
-    (ex. filename = 'Boston_terrier_02259.jpg' Pet label = 'boston terrier')
+    Creates a dictionary of pet labels (results_dic) based upon the filenames
+    of the image files. The filenames hold the true identity of the pet, so
+    these labels are used to check the labels returned by the classifier.
+    Hidden files and files without an image extension are skipped.
     Parameters:
      image_dir - The (full) path to the folder of images that are to be
                  classified by the classifier function (string)
     Returns:
-      results_dic - Dictionary with 'key' as image filename and 'value' as a 
-      List. The list contains for following item:
+      results_dic - Dictionary with 'key' as image filename and 'value' as a
+      List. The list contains the following item:
          index 0 = pet image label (string)
     """
-    # Replace None with the results_dic dictionary that you created with this
-    # function
-    ##print("####" + image_dir)
-    results_dic = dict() # Creates empty dictionary named results_dic
-    pet_labels = [] # Creates empty list
-    filename_list = listdir(image_dir) # Retrieve the filenames from folder pet_images/
-    pet_name = ""
-    for idx in range(0, len(filename_list), 1):
-        pet_image = filename_list[idx].lower()
-        low_pet_image = pet_image.lower()
-        word_list_pet_image = low_pet_image.split("_")
-        #pet_name = ""
-        for word in word_list_pet_image:
-            if word.isalpha():
-                pet_name += word + " "
-        
-        pet_name = pet_name.strip() # Strip off starting/trailing whitespace characters
-        #pet_labels += pet_name
-        pet_labels.append(pet_name)
-        pet_name=''
-    #print("#DEBUG# get_pet_labels.py## ")
-    #print("#DEBUG pet_labels: {}".format(pet_labels))  
-    # Create Dic
-    for idx in range(0, len(filename_list), 1):
-        if filename_list[idx] not in results_dic:
-            results_dic[filename_list[idx]] = [pet_labels[idx]]
-    else:
-        print("** Warning: Key=", filename_list[idx],
-               "already exists in results_dic with value =",
-               results_dic[filename_list[idx]])
-        
+    results_dic = dict()
+    # Sorted so the output order is the same on every machine.
+    for filename in sorted(os.listdir(image_dir)):
+        if not is_image_file(filename):
+            logging.info("Skipping non-image file: %s", filename)
+            continue
+        results_dic[filename] = [label_from_filename(filename)]
+
     return results_dic

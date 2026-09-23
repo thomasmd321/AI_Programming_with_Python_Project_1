@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # PyTorch isn't installed: the tests stub out the classifier and
+      # torch, so they never download the pretrained CNNs.
+      - name: Install tools
+        run: pip install -r requirements-dev.txt
+
+      # Full flake8 (PEP 8 + pyflakes); settings are in setup.cfg.
+      - name: Lint
+        run: flake8 workspace tests
+
+      - name: Compile all modules
+        run: python -m compileall -q workspace tests
+
+      - name: Unit tests
+        run: pytest -v
