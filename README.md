@@ -10,6 +10,10 @@ non-dogs and names the right dog breed. The project compares **ResNet-18**,
 **AlexNet** and **VGG-16**; **ResNet-50** and **EfficientNet-B0** are also
 available for comparison.
 
+Full documentation is in the
+[wiki](https://github.com/thomasmd321/AI_Programming_with_Python_Project_1/wiki)
+(sources in [`docs/wiki/`](docs/wiki/)).
+
 The true identity of each pet comes from the image filename
 (`Boston_terrier_02259.jpg` → `boston terrier`). The program compares that
 label with the CNN's prediction.
@@ -69,6 +73,7 @@ models get credit for calling those photos dogs.
 ├── .github/workflows/ci.yml     # CI: lint + unit tests on Python 3.10, 3.12, 3.13
 ├── .github/dependabot.yml       # Weekly dependency-update pull requests
 ├── notebooks/run_on_colab.ipynb # Runs every model for real on Google Colab
+├── docs/wiki/                   # Wiki pages, published with docs/wiki/publish.sh
 ├── tests/                       # pytest tests (no PyTorch needed)
 └── workspace/
     ├── check_images.py          # Main program – runs the whole pipeline
