@@ -1,8 +1,8 @@
 # Runtime dependencies for workspace/ (the pretrained CNNs).
 # classifier.py uses torchvision's weights= API when it exists (0.13+) and
 # falls back to pretrained=True on older versions.
-torch>=1.12
-torchvision>=0.13
+torch>=2.14.0
+torchvision>=0.29.0
 Pillow>=9.0
 # Charts in plot_results.py / the Colab notebook.
 matplotlib>=3.5
