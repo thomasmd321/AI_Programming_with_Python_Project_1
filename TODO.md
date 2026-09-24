@@ -12,10 +12,18 @@ to `workspace/`. The untouched original code is on the `original-code` branch.
       random weights for all five architectures. Open
       `notebooks/run_on_colab.ipynb` in Colab, run all cells, and commit the
       downloaded outputs. This also produces the first real results for
-      the mirrored `_02` images, ResNet-50, EfficientNet and the CSV files.
+      the mirrored `_02` images, ResNet-50, EfficientNet, seconds per image,
+      the CSV files and the charts.
 - [ ] **Protect `master` on GitHub** (a repository setting, not code):
       *Settings → Branches → Add branch ruleset* (or *Add rule*) for `master`,
-      and turn on "Require status checks to pass" with the `test` check.
+      and turn on "Require status checks to pass" with the `test (3.10)`,
+      `test (3.12)` and `test (3.13)` checks.
+- [ ] **Add a license.** Without one, nobody else may legally reuse the code.
+      MIT is the usual choice for your own code, with a note that the starter
+      files are Udacity's. *Needs your decision.*
+- [ ] **Tag the finished project as `v1.0`.** *Needs your go-ahead.*
+- [ ] **Next project: fine-tune a model** (e.g. ResNet-50 on the Stanford
+      Dogs dataset) and compare it with the pretrained models.
 - [ ] ~~Replace the positional `results_dic` list with a dataclass.~~
       **Won't do:** Udacity's `print_functions_for_lab_checks.py` and the
       project rubric expect the `[label, clf_label, match, is_dog, clf_is_dog]`
@@ -23,7 +31,25 @@ to `workspace/`. The untouched original code is on the `original-code` branch.
 
 ## Done
 
+### Tooling
+
+- [x] The README said Python 3.7+, but the test tools need 3.10+ (and 3.9 is
+      end-of-life). The README now says 3.10+, and CI tests 3.10, 3.12 and 3.13.
+- [x] Dependabot opens weekly pull requests for newer pip packages and
+      GitHub Actions (`.github/dependabot.yml`).
+
 ### Features
+
+- [x] Model size and speed: every run prints the parameter count and the
+      classification time per image, and the comparison table shows them
+      beside the accuracy, with each run's total runtime. (The replayed
+      outputs show "n/a" for seconds per image until the Colab run.)
+- [x] Images are classified in batches of 16 (`classifier.predict_batch`).
+      Same answers as one at a time; on a 4-core CPU 1.1–1.5× faster for most
+      models (VGG about 10% slower), and usually more on a GPU.
+- [x] Charts (`plot_results.py`, used by the Colab notebook): accuracy by
+      model, speed against breed accuracy, and a grid of each model's
+      mistakes with its top guesses.
 
 - [x] `--topk N` prints the model's top N guesses, with confidence, for images
       whose labels don't match.

@@ -23,6 +23,10 @@ PCT_LABELS = {
     'pct_correct_breed': '% Correct Breed',
     'pct_correct_notdogs': '% Correct Not-a-Dog',
 }
+SPEED_LABELS = {
+    'params_m': 'Parameters (M)',
+    'sec_per_image': 'Seconds per Image',
+}
 SUMMARY_HEADER = "*** Results Summary for CNN Model Architecture"
 
 
@@ -88,6 +92,23 @@ def print_results(results_dic, results_stats_dic, model,
             if sum(results_dic[key][3:]) == 2 and results_dic[key][2] == 0:
                 print("Real: {:>26}   Classifier: {:>30}".format(
                     results_dic[key][0], results_dic[key][1]))
+
+
+def print_model_speed(n_params, classify_seconds, n_images):
+    """
+    Prints the model's size and how long classification took per image, so
+    models can be compared on speed and size as well as accuracy.
+    Parameters:
+      n_params - number of learned parameters in the model (int)
+      classify_seconds - time spent classifying all the images (float)
+      n_images - number of images classified (int)
+    Returns:
+      None - simply printing results.
+    """
+    print("\n*** Model Size and Speed ***")
+    print("{:20}: {:8.1f}".format(SPEED_LABELS['params_m'], n_params / 1e6))
+    print("{:20}: {:8.3f}".format(SPEED_LABELS['sec_per_image'],
+                                  classify_seconds / n_images if n_images else 0.0))
 
 
 def print_top_predictions(results_dic, predictions, top_k):

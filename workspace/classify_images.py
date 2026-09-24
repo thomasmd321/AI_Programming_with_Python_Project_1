@@ -14,7 +14,7 @@
 import os
 import re
 
-from classifier import predict
+from classifier import predict_batch
 
 
 def labels_match(pet_label, classifier_label):
@@ -31,7 +31,7 @@ def labels_match(pet_label, classifier_label):
     return re.search(pattern, classifier_label) is not None
 
 
-def classify_images(images_dir, results_dic, model, top_k=1):
+def classify_images(images_dir, results_dic, model, top_k=1, batch_size=16):
     """
     Creates classifier labels with the classifier, compares pet labels
     to the classifier labels, and adds the classifier label and the comparison
@@ -51,14 +51,19 @@ def classify_images(images_dir, results_dic, model, top_k=1):
               classifier function to classify the pet images,
               e.g. resnet alexnet vgg (string)
       top_k - how many of the model's most likely classes to keep (int)
+      batch_size - how many images to run through the model at once (int)
     Returns:
       predictions - Dictionary with image filename as 'key' and a list of
                     (lower-case class name, probability) tuples as 'value',
                     most likely first. results_dic is updated in place.
     """
+    # Classify every image, a batch at a time.
+    keys = list(results_dic)
+    all_guesses = predict_batch([os.path.join(images_dir, key) for key in keys],
+                                model, max(top_k, 1), batch_size)
+
     predictions = {}
-    for key in results_dic:
-        guesses = predict(os.path.join(images_dir, key), model, max(top_k, 1))
+    for key, guesses in zip(keys, all_guesses):
         predictions[key] = [(label.lower().strip(), prob) for label, prob in guesses]
 
         # The top guess, normalized to match pet labels, is the classifier label.
