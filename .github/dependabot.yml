@@ -6,6 +6,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Leave ranges like "torch>=1.12" alone unless a new release falls outside
+    # them; only exact pins (requirements-dev.txt) get bumped. The default
+    # would raise every minimum to the latest release.
+    versioning-strategy: increase-if-necessary
     groups:
       # One PR for PyTorch + torchvision, which must be upgraded together.
       pytorch:

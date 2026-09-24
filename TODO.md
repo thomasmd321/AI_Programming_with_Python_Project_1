@@ -18,10 +18,6 @@ to `workspace/`. The untouched original code is on the `original-code` branch.
       *Settings → Branches → Add branch ruleset* (or *Add rule*) for `master`,
       and turn on "Require status checks to pass" with the `test (3.10)`,
       `test (3.12)` and `test (3.13)` checks.
-- [ ] **Add a license.** Without one, nobody else may legally reuse the code.
-      MIT is the usual choice for your own code, with a note that the starter
-      files are Udacity's. *Needs your decision.*
-- [ ] **Tag the finished project as `v1.0`.** *Needs your go-ahead.*
 - [ ] **Next project: fine-tune a model** (e.g. ResNet-50 on the Stanford
       Dogs dataset) and compare it with the pretrained models.
 - [ ] ~~Replace the positional `results_dic` list with a dataclass.~~
@@ -32,6 +28,11 @@ to `workspace/`. The untouched original code is on the `original-code` branch.
 ## Done
 
 ### Tooling
+
+- [x] Added the MIT License for Thomas Stewart's code. `NOTICE.md` lists
+      what it doesn't cover: the Udacity starter material and the uploaded
+      photos.
+- [x] Tagged the finished project as `v1.0`.
 
 - [x] The README said Python 3.7+, but the test tools need 3.10+ (and 3.9 is
       end-of-life). The README now says 3.10+, and CI tests 3.10, 3.12 and 3.13.
