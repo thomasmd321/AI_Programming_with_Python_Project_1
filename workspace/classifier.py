@@ -4,11 +4,13 @@
 #
 # PROGRAMMER: Udacity (supplied with the project), revised by Thomas Stewart
 # REVISED DATE: September 23, 2026
-# PURPOSE: Runs one image through a CNN pretrained on ImageNet.
-#            predict(img_path, model_name, k) -> the k most likely ImageNet
-#                classes with their probabilities, e.g.
+# PURPOSE: Runs images through a CNN pretrained on ImageNet.
+#            predict_batch(img_paths, model_name, k) -> for each image, the k
+#                most likely ImageNet classes with their probabilities, e.g.
 #                [('golden retriever', 0.92), ('Labrador retriever', 0.05)]
+#            predict(img_path, model_name, k) -> the same for one image
 #            classifier(img_path, model_name) -> just the top class name
+#            parameter_count(model_name) -> the model's size
 #          Supported model names are the keys of ARCHITECTURES.
 #
 #          Each model is downloaded/loaded the first time it is used and then
@@ -83,6 +85,43 @@ def _load_image(img_path):
     return img.convert('RGB')
 
 
+def predict_batch(img_paths, model_name, k=1, batch_size=16):
+    """
+    Classifies several images with a pretrained CNN, batch_size at a time.
+    Running a batch through the model at once is usually faster than one
+    image at a time, especially on a GPU (on a CPU the gain is small).
+    Parameters:
+      img_paths - paths to the image files (list of strings)
+      model_name - one of the ARCHITECTURES keys (string)
+      k - how many of the most likely classes to return per image (int)
+      batch_size - how many images to run through the model at once (int)
+    Returns:
+      one list per image, in the same order as img_paths, of
+      (class name, probability) tuples, most likely first. Class names are
+      mixed case, with several names separated by commas.
+    """
+    model = _load_model(model_name)
+    results = []
+    for start in range(0, len(img_paths), batch_size):
+        chunk = img_paths[start:start + batch_size]
+
+        # Preprocess each image and stack them: (batch, 3, 224, 224).
+        batch = torch.stack([PREPROCESS(_load_image(path)) for path in chunk]).to(DEVICE)
+
+        # Inference only, so skip gradient tracking.
+        with torch.no_grad():
+            output = model(batch)
+
+        # Turn each image's scores for the 1000 classes into probabilities,
+        # and keep the top k.
+        probabilities = torch.nn.functional.softmax(output, dim=1)
+        top_probs, top_idxs = torch.topk(probabilities, k, dim=1)
+        for probs, idxs in zip(top_probs.tolist(), top_idxs.tolist()):
+            results.append([(imagenet_classes_dict[int(idx)], float(prob))
+                            for prob, idx in zip(probs, idxs)])
+    return results
+
+
 def predict(img_path, model_name, k=1):
     """
     Classifies one image with a pretrained CNN.
@@ -91,23 +130,14 @@ def predict(img_path, model_name, k=1):
       model_name - one of the ARCHITECTURES keys (string)
       k - how many of the most likely classes to return (int)
     Returns:
-      list of (class name, probability) tuples, most likely first. Class
-      names are mixed case, with several names separated by commas.
+      list of (class name, probability) tuples, most likely first.
     """
-    model = _load_model(model_name)
+    return predict_batch([img_path], model_name, k)[0]
 
-    # Preprocess and add a batch dimension: (3, 224, 224) -> (1, 3, 224, 224).
-    img_tensor = PREPROCESS(_load_image(img_path)).unsqueeze(0).to(DEVICE)
 
-    # Inference only, so skip gradient tracking.
-    with torch.no_grad():
-        output = model(img_tensor)
-
-    # Turn the scores for the 1000 classes into probabilities, keep the top k.
-    probabilities = torch.nn.functional.softmax(output[0], dim=0)
-    top_probs, top_idxs = torch.topk(probabilities, k)
-    return [(imagenet_classes_dict[int(idx)], float(prob))
-            for prob, idx in zip(top_probs.tolist(), top_idxs.tolist())]
+def parameter_count(model_name):
+    """Returns the number of learned parameters (weights) in the model."""
+    return sum(param.numel() for param in _load_model(model_name).parameters())
 
 
 def classifier(img_path, model_name):

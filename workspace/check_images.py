@@ -40,9 +40,10 @@ from print_functions_for_lab_checks import (
 from get_input_args import get_input_args
 from get_pet_labels import get_pet_labels
 from classify_images import classify_images
+from classifier import parameter_count
 from adjust_results4_isadog import adjust_results4_isadog
 from calculates_results_stats import calculates_results_stats
-from print_results import print_results, print_top_predictions
+from print_results import print_results, print_model_speed, print_top_predictions
 from export_results import write_results_csv
 
 
@@ -70,7 +71,10 @@ def main():
     # 3. Run the CNN on every image and append the classifier label and a
     #    1/0 "labels match" flag to each entry: [pet_label, clf_label, match].
     #    predictions keeps each image's top guesses and their confidence.
+    #    This step is timed on its own, to compare the models' speed.
+    classify_start = time()
     predictions = classify_images(in_arg.dir, results, in_arg.arch, top_k=max(in_arg.topk, 1))
+    classify_seconds = time() - classify_start
     check_classifying_images(results)
 
     # 4. Append "pet label is a dog" and "classifier label is a dog" flags,
@@ -84,6 +88,7 @@ def main():
 
     # 6. Print the summary plus the misclassified dogs and breeds.
     print_results(results, results_stats, in_arg.arch, True, True)
+    print_model_speed(parameter_count(in_arg.arch), classify_seconds, len(results))
 
     # Optional extras: the model's top guesses where it got the label wrong,
     # and a CSV of every image's results.

@@ -22,9 +22,20 @@ class FakeTensor:
         return list(self.values)
 
 
-def fake_topk(probabilities, k):
+class FakeBatch:
+    """Stands in for a stacked batch of images, and for the model's output."""
+    def __init__(self, size):
+        self.size = size
+
+    def to(self, device):
+        return self
+
+
+def fake_topk(probabilities, k, dim):
+    # Every image in the batch gets the same fake top k.
     top = FAKE_TOP[:k]
-    return FakeTensor([p for p, _ in top]), FakeTensor([i for _, i in top])
+    return (FakeTensor([[p for p, _ in top]] * probabilities.size),
+            FakeTensor([[i for _, i in top]] * probabilities.size))
 
 
 @pytest.fixture
@@ -37,6 +48,8 @@ def classifier_module(monkeypatch, import_fresh):
     torch.nn = types.SimpleNamespace(
         functional=types.SimpleNamespace(softmax=lambda x, dim: x))
     torch.topk = fake_topk
+    stacked = []
+    torch.stack = lambda images: stacked.append(len(images)) or FakeBatch(len(images))
 
     tv_models = types.ModuleType("torchvision.models")
     built = []
@@ -47,6 +60,11 @@ def classifier_module(monkeypatch, import_fresh):
             model = mock.MagicMock(name=name)
             model.to.return_value = model
             model.eval.return_value = model
+            # The "output" has one row per image in the batch.
+            model.side_effect = lambda batch: batch
+            model.parameters.return_value = [FakeTensor([0]) for _ in range(3)]
+            for param, size in zip(model.parameters.return_value, (100, 20, 3)):
+                param.numel = lambda size=size: size
             return model
         return builder
 
@@ -71,6 +89,7 @@ def classifier_module(monkeypatch, import_fresh):
         monkeypatch.setitem(sys.modules, name, module)
 
     module = import_fresh("classifier")
+    module.stacked = stacked
     return module, built, tv_models, pil
 
 
@@ -132,3 +151,26 @@ def test_architecture_lists_match(classifier_module):
     # get_input_args keeps its own copy so parsing arguments doesn't need PyTorch.
     classifier, _, _, _ = classifier_module
     assert tuple(classifier.ARCHITECTURES) == get_input_args.ARCHITECTURES
+
+
+def test_predict_batch_splits_into_batches_and_keeps_order(classifier_module):
+    classifier, _, _, pil = classifier_module
+    paths = ["img{}.jpg".format(i) for i in range(5)]
+
+    results = classifier.predict_batch(paths, "vgg", k=2, batch_size=2)
+
+    assert classifier.stacked == [2, 2, 1]
+    assert len(results) == 5
+    assert all(r == [("golden retriever", 0.90), ("Labrador retriever", 0.06)] for r in results)
+    opened = [call.args[0] for call in pil.Image.open.call_args_list]
+    assert opened == paths
+
+
+def test_predict_batch_empty(classifier_module):
+    classifier, _, _, _ = classifier_module
+    assert classifier.predict_batch([], "vgg") == []
+
+
+def test_parameter_count(classifier_module):
+    classifier, _, _, _ = classifier_module
+    assert classifier.parameter_count("alexnet") == 123

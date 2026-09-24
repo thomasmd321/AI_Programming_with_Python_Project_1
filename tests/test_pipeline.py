@@ -137,6 +137,29 @@ def test_classify_images_appends_label_and_match(fake_classifier, import_fresh):
                              (os.path.join("some/dir", "cat_02.jpg"), "resnet")]
 
 
+def test_classify_images_batches_and_keeps_order(fake_classifier, import_fresh, monkeypatch):
+    labels, _ = fake_classifier
+    names = ["dog_{:02d}.jpg".format(i) for i in range(5)]
+    labels.update({name: "Beagle" for name in names})
+    classify_images = import_fresh("classify_images")
+    batches = []
+    real_predict_batch = classify_images.predict_batch
+
+    def spy(paths, model, k=1, batch_size=16):
+        batches.append((len(paths), batch_size))
+        return real_predict_batch(paths, model, k, batch_size)
+
+    monkeypatch.setattr(classify_images, "predict_batch", spy)
+    results = {name: ["dog"] for name in names}
+
+    classify_images.classify_images("d", results, "vgg", batch_size=2)
+
+    # All images go to predict_batch in one call; it splits them into batches.
+    assert batches == [(5, 2)]
+    assert list(results) == names
+    assert all(results[name][1:] == ["beagle", 0] for name in names)
+
+
 def test_classify_images_keeps_top_k_guesses(fake_classifier, import_fresh):
     labels, _ = fake_classifier
     labels["pug_01.jpg"] = [("Boxer", 0.6), ("Pug, pug-dog", 0.3), ("Bull mastiff", 0.1)]

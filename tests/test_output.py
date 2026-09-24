@@ -8,7 +8,7 @@ import pytest
 
 from export_results import CSV_COLUMNS, write_results_csv
 from print_model_tables import PET_IMAGE_FILES, parse_results_file, print_models_table
-from print_results import print_results, print_top_predictions
+from print_results import print_model_speed, print_results, print_top_predictions
 
 from conftest import WORKSPACE
 
@@ -94,8 +94,32 @@ def test_print_models_table(tmp_path, capsys):
     assert lines[0] == "N Images            |   4"
     rows = [line for line in lines if line.startswith(("resnet", "alexnet", "vgg"))]
     assert [r.split()[0] for r in rows] == ["resnet", "alexnet", "vgg"]
-    assert rows[0].split("|")[-1].strip() == "10.00%"
+    # Columns: model, 4 percentages, params, sec/image, runtime.
+    assert rows[0].split("|")[4].strip() == "10.00%"
     assert rows[1].split("|")[2].strip() == "66.67%"
+    # These files have no size/speed/runtime lines.
+    assert [cell.strip() for cell in rows[0].split("|")[5:]] == ["n/a", "n/a", "n/a"]
+
+
+def test_print_models_table_size_speed_and_runtime(tmp_path, capsys):
+    import contextlib
+    import io
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        print_results({}, STATS, "vgg")
+        print_model_speed(138357544, 8.0, 40)
+        print("\n** Total Elapsed Runtime: 0:01:05")
+    path = tmp_path / "vgg.txt"
+    path.write_text(buf.getvalue())
+
+    model, stats = parse_results_file(str(path))
+    assert stats["params_m"] == pytest.approx(138.4)
+    assert stats["sec_per_image"] == pytest.approx(0.2)
+    assert stats["runtime"] == 65
+
+    print_models_table([str(path)])
+    row = capsys.readouterr().out.splitlines()[-1]
+    assert [cell.strip() for cell in row.split("|")[5:]] == ["138.4", "0.200", "0:01:05"]
 
 
 def test_print_models_table_skips_missing_files(tmp_path, capsys):
@@ -127,7 +151,9 @@ def test_saved_output_files_parse():
         if name.endswith(("_pet-images.txt", "_uploaded-images.txt")):
             model, stats = parse_results_file(os.path.join(WORKSPACE, name))
             assert model == name.split("_")[0]
-            assert len(stats) == 7
+            # 3 counts, 4 percentages, the model size and the total runtime.
+            # (The replayed runs have no measured seconds per image.)
+            assert len(stats) == 9 and "params_m" in stats and "runtime" in stats
 
 
 # --- check_images -----------------------------------------------------------
@@ -167,6 +193,8 @@ def test_check_images_end_to_end(fake_classifier, import_fresh, monkeypatch, tmp
     out = capsys.readouterr().out
 
     assert "*** Results Summary for CNN Model Architecture RESNET50 ***" in out
+    assert "Parameters (M)      :      1.2" in out
+    assert "Seconds per Image   :" in out
     assert "% Correct Breed     :  50.00" in out
     # Top guesses are shown for the one mismatch only.
     top = out.split("Top 2 guesses for images whose labels don't match:")[1]
@@ -224,3 +252,16 @@ def test_write_results_csv(tmp_path):
     assert rows[2] == ["vgg", "b.jpg", "beagle", "walker hound", "0.5000", "0", "1", "1",
                        "walker hound (50.0%); beagle (30.0%); basset (10.0%)"]
     assert len(rows) == 5
+
+
+def test_print_model_speed(capsys):
+    print_model_speed(61100840, 3.0, 40)
+    assert capsys.readouterr().out.splitlines()[1:] == [
+        "*** Model Size and Speed ***",
+        "Parameters (M)      :     61.1",
+        "Seconds per Image   :    0.075"]
+
+
+def test_print_model_speed_no_images(capsys):
+    print_model_speed(5288548, 0.0, 0)
+    assert "Seconds per Image   :    0.000" in capsys.readouterr().out

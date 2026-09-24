@@ -97,4 +97,7 @@ INCORRECT Dog Breed Assignment:
 Real:                labradoodle   Classifier:    soft-coated wheaten terrier
 Real:                labradoodle   Classifier:    soft-coated wheaten terrier
 
+*** Model Size and Speed ***
+Parameters (M)      :     11.7
+
 ** Total Elapsed Runtime: 0:00:01

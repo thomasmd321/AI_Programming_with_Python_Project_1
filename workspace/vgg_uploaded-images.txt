@@ -97,4 +97,7 @@ INCORRECT Dog Breed Assignment:
 Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
 Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
 
+*** Model Size and Speed ***
+Parameters (M)      :    138.4
+
 ** Total Elapsed Runtime: 0:00:07

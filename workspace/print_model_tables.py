@@ -16,7 +16,7 @@ import logging
 from os import path
 
 from get_input_args import ARCHITECTURES
-from print_results import COUNT_LABELS, PCT_LABELS, SUMMARY_HEADER
+from print_results import COUNT_LABELS, PCT_LABELS, SPEED_LABELS, SUMMARY_HEADER
 
 
 def output_files(suffix):
@@ -27,12 +27,28 @@ def output_files(suffix):
 PET_IMAGE_FILES = output_files('pet-images')
 UPLOADED_IMAGE_FILES = output_files('uploaded-images')
 
-# Table columns, left to right, as (statistic key, column heading).
-COLUMNS = (('pct_correct_notdogs', '% Not-a-dog Correct'),
-           ('pct_correct_dogs', '% Dogs Correct'),
-           ('pct_correct_breed', '% Breeds Correct'),
-           ('pct_match', '% Match Labels'))
-ROW_FORMAT = "{:<24} |{:<20} |{:<15} |{:<18} |{:<17}"
+# The last line of each output file, e.g. "** Total Elapsed Runtime: 0:00:32".
+RUNTIME_LABEL = "** Total Elapsed Runtime"
+
+
+def _percent(value):
+    return "{:.2f}%".format(value)
+
+
+def _runtime(seconds):
+    return "{:d}:{:02d}:{:02d}".format(seconds // 3600, (seconds % 3600) // 60, seconds % 60)
+
+
+# Table columns, left to right: (statistic key, column heading, formatter).
+# A model whose output file lacks a statistic shows "n/a".
+COLUMNS = (('pct_correct_notdogs', '% Not-a-dog Correct', _percent),
+           ('pct_correct_dogs', '% Dogs Correct', _percent),
+           ('pct_correct_breed', '% Breeds Correct', _percent),
+           ('pct_match', '% Match Labels', _percent),
+           ('params_m', 'Params (M)', "{:.1f}".format),
+           ('sec_per_image', 'Sec/Image', "{:.3f}".format),
+           ('runtime', 'Total Runtime', _runtime))
+ROW_FORMAT = "{:<24} |" + " |".join("{:<%d}" % max(len(title), 8) for _, title, _ in COLUMNS)
 
 
 def parse_results_file(filename):
@@ -43,9 +59,11 @@ def parse_results_file(filename):
       filename - path to the output file (string)
     Returns:
       (model, stats) - model name in lower case (string) and a dictionary of
-                       statistic key -> value (int for counts, float for pcts)
+                       statistic key -> value (int for counts and the runtime
+                       in seconds, float for the rest)
     """
-    labels = {label: key for key, label in {**COUNT_LABELS, **PCT_LABELS}.items()}
+    labels = {label: key for key, label in
+              {**COUNT_LABELS, **PCT_LABELS, **SPEED_LABELS}.items()}
     model = None
     stats = {}
     with open(filename, 'r') as infile:
@@ -58,15 +76,20 @@ def parse_results_file(filename):
             # "% Correct Dogs      : 100.00". Only read after the header:
             # the earlier lab-check output has similar-looking lines.
             label, sep, value = line.partition(':')
-            if model is not None and sep and label.strip() in labels:
+            if model is None or not sep:
+                continue
+            if label.strip() in labels:
                 key = labels[label.strip()]
                 stats[key] = int(value) if key.startswith('n_') else float(value)
+            elif label.strip() == RUNTIME_LABEL:
+                hours, minutes, seconds = (int(part) for part in value.split(':'))
+                stats['runtime'] = hours * 3600 + minutes * 60 + seconds
     return model, stats
 
 
 def print_models_table(files=PET_IMAGE_FILES):
     """
-    Prints the image counts and a table of percentage statistics for each
+    Prints the image counts and a table of accuracy, size and speed for each
     model, parsed from saved check_images.py output files. Files that don't
     exist are skipped.
     Parameters:
@@ -93,9 +116,10 @@ def print_models_table(files=PET_IMAGE_FILES):
         print("{:20}| {:3d}".format(label, first_stats[key]))
     print("")
 
-    print(ROW_FORMAT.format('CNN model architecture', *(title for _, title in COLUMNS)))
+    print(ROW_FORMAT.format('CNN model architecture', *(title for _, title, _ in COLUMNS)))
     for model, stats in results:
-        print(ROW_FORMAT.format(model, *("{:.2f}%".format(stats[key]) for key, _ in COLUMNS)))
+        print(ROW_FORMAT.format(model, *(fmt(stats[key]) if key in stats else "n/a"
+                                         for key, _, fmt in COLUMNS)))
     return True
 
 

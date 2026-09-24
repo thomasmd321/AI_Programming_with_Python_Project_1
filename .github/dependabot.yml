@@ -1,0 +1,17 @@
+# Opens pull requests when dependencies have newer versions; CI checks each one.
+version: 2
+updates:
+  # requirements.txt and requirements-dev.txt
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # One PR for PyTorch + torchvision, which must be upgraded together.
+      pytorch:
+        patterns: ["torch", "torchvision"]
+  # Action versions in .github/workflows/
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

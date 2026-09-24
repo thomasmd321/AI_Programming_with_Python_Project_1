@@ -99,4 +99,7 @@ Real:            german shepherd   Classifier:                       malinois
 Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
 Real:                labradoodle   Classifier: tibetan terrier, chrysanthemum dog
 
+*** Model Size and Speed ***
+Parameters (M)      :     61.1
+
 ** Total Elapsed Runtime: 0:00:00
