@@ -60,6 +60,8 @@ models get credit for calling those photos dogs.
 ```
 .
 ├── README.md
+├── LICENSE                      # MIT, for Thomas Stewart's code
+├── NOTICE.md                    # What the license does and doesn't cover
 ├── TODO.md                      # Code improvements: done and still open
 ├── requirements.txt             # Runtime dependencies (PyTorch, Pillow)
 ├── requirements-dev.txt         # Test/lint tools
@@ -194,6 +196,10 @@ week when a dependency or GitHub Action has a newer version.
 - `original-code`: a snapshot of the project exactly as it was submitted,
   before cleanup.
 
-## Author
+## Author and license
 
-Thomas Stewart. Starter code and helper modules by Udacity.
+Thomas Stewart. Starter code, helper modules and the course images by Udacity.
+
+Thomas Stewart's code is released under the [MIT License](LICENSE).
+[NOTICE.md](NOTICE.md) lists what that covers and what it doesn't (the
+Udacity starter material and the uploaded photos).
