@@ -71,7 +71,10 @@ def main():
     # 3. Run the CNN on every image and append the classifier label and a
     #    1/0 "labels match" flag to each entry: [pet_label, clf_label, match].
     #    predictions keeps each image's top guesses and their confidence.
-    #    This step is timed on its own, to compare the models' speed.
+    #    This step is timed on its own, to compare the models' speed. The model
+    #    is loaded (and downloaded on first use) before the clock starts, so
+    #    the time covers classifying only.
+    n_params = parameter_count(in_arg.arch)
     classify_start = time()
     predictions = classify_images(in_arg.dir, results, in_arg.arch, top_k=max(in_arg.topk, 1))
     classify_seconds = time() - classify_start
@@ -88,7 +91,7 @@ def main():
 
     # 6. Print the summary plus the misclassified dogs and breeds.
     print_results(results, results_stats, in_arg.arch, True, True)
-    print_model_speed(parameter_count(in_arg.arch), classify_seconds, len(results))
+    print_model_speed(n_params, classify_seconds, len(results))
 
     # Optional extras: the model's top guesses where it got the label wrong,
     # and a CSV of every image's results.

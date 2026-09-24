@@ -44,8 +44,10 @@ def test_get_input_args_optional_extras(monkeypatch):
     assert (args.arch, args.topk, args.csv) == ("efficientnet", 3, "out.csv")
 
 
-def test_get_input_args_rejects_negative_topk(monkeypatch, capsys):
-    monkeypatch.setattr(sys, "argv", ["check_images.py", "--topk", "-1"])
+@pytest.mark.parametrize("topk", ["-1", "1001"])
+def test_get_input_args_rejects_out_of_range_topk(monkeypatch, capsys, topk):
+    # There are only 1000 ImageNet classes; catch this before the model runs.
+    monkeypatch.setattr(sys, "argv", ["check_images.py", "--topk", topk])
     with pytest.raises(SystemExit):
         get_input_args()
     assert "--topk" in capsys.readouterr().err
