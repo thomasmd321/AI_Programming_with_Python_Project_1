@@ -7,7 +7,8 @@ import sys
 import pytest
 
 from export_results import CSV_COLUMNS, write_results_csv
-from print_model_tables import PET_IMAGE_FILES, parse_results_file, print_models_table
+from print_model_tables import (PET_IMAGE_FILES, REQUIRED_STATS, parse_results_file,
+                                print_models_table, read_results)
 from print_results import print_model_speed, print_results, print_top_predictions
 
 from conftest import WORKSPACE
@@ -151,9 +152,9 @@ def test_saved_output_files_parse():
         if name.endswith(("_pet-images.txt", "_uploaded-images.txt")):
             model, stats = parse_results_file(os.path.join(WORKSPACE, name))
             assert model == name.split("_")[0]
-            # 3 counts, 4 percentages, the model size and the total runtime.
-            # (The replayed runs have no measured seconds per image.)
-            assert len(stats) == 9 and "params_m" in stats and "runtime" in stats
+            # A real run also records seconds per image; the replayed runs don't.
+            assert REQUIRED_STATS | {"params_m", "runtime"} <= set(stats)
+            assert set(stats) <= REQUIRED_STATS | {"params_m", "runtime", "sec_per_image"}
 
 
 # --- check_images -----------------------------------------------------------
@@ -265,3 +266,37 @@ def test_print_model_speed(capsys):
 def test_print_model_speed_no_images(capsys):
     print_model_speed(5288548, 0.0, 0)
     assert "Seconds per Image   :    0.000" in capsys.readouterr().out
+
+
+# --- review fixes -------------------------------------------------------------
+
+def test_read_results_skips_cut_short_file(tmp_path, capsys, caplog):
+    good = tmp_path / "vgg.txt"
+    write_results(good, "vgg", STATS)
+    cut_short = tmp_path / "resnet.txt"
+    cut_short.write_text("Command Line Arguments:\n     dir = pet_images/\n")
+    capsys.readouterr()
+
+    results = read_results([str(cut_short), str(tmp_path / "missing.txt"), str(good)])
+
+    assert [model for model, _ in results] == ["vgg"]
+    assert "resnet.txt" in caplog.text and "missing.txt" not in caplog.text
+
+    assert print_models_table([str(cut_short), str(good)]) is True
+    assert capsys.readouterr().out.splitlines()[-1].startswith("vgg")
+
+
+def test_check_images_loads_model_before_timing(fake_classifier, import_fresh,
+                                                monkeypatch, tmp_path, capsys):
+    # The model must be loaded (parameter_count) before classifying starts,
+    # so the seconds per image don't include downloading/loading it.
+    labels, calls = fake_classifier
+    labels["cat_01.jpg"] = "tabby cat"
+    fake = sys.modules["classifier"]
+    monkeypatch.setattr(fake, "parameter_count",
+                        lambda model: calls.append(("parameter_count", model)) or 1234567)
+
+    run_check_images(monkeypatch, import_fresh, labels, tmp_path)
+
+    assert calls[0] == ("parameter_count", "vgg")
+    assert calls[1][0].endswith("cat_01.jpg")

@@ -49,6 +49,7 @@ def get_input_args():
                         help='also save one row per image to this CSV file')
 
     args = parser.parse_args()
-    if args.topk < 0:
-        parser.error('--topk must be 0 or more')
+    # There are 1000 ImageNet classes, so at most 1000 guesses to show.
+    if not 0 <= args.topk <= 1000:
+        parser.error('--topk must be between 0 and 1000')
     return args

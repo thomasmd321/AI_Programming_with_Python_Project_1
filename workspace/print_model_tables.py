@@ -87,28 +87,50 @@ def parse_results_file(filename):
     return model, stats
 
 
+# Every complete output file has these statistics.
+REQUIRED_STATS = set(COUNT_LABELS) | set(PCT_LABELS)
+
+
+def read_results(files):
+    """
+    Parses the output files that exist and hold a complete results summary.
+    Others are skipped: a missing file quietly (that model wasn't run), and a
+    file without a summary (e.g. a batch run cut short) with a warning.
+    Parameters:
+      files - output files from check_images.py, one per model
+    Returns:
+      [(model, stats)] in the same order as files
+    """
+    results = []
+    for filename in files:
+        if not path.exists(filename):
+            continue
+        model, stats = parse_results_file(filename)
+        if model is None or not REQUIRED_STATS <= set(stats):
+            logging.warning("Skipping %s: it has no complete results summary "
+                            "(was the run cut short?)", filename)
+            continue
+        results.append((model, stats))
+    return results
+
+
 def print_models_table(files=PET_IMAGE_FILES):
     """
     Prints the image counts and a table of accuracy, size and speed for each
     model, parsed from saved check_images.py output files. Files that don't
-    exist are skipped.
+    exist or have no complete results are skipped (see read_results).
     Parameters:
       files - output files from check_images.py, one per model.
               Defaults to the pet_images runs.
     Returns:
-      True if the table was printed, False if none of the files exist.
+      True if the table was printed, False if none of the files could be used.
     """
-    existing = [f for f in files if path.exists(f)]
-    if not existing:
-        logging.warning("Can't print the model table; none of %s exist. "
+    results = read_results(files)
+    if not results:
+        logging.warning("Can't print the model table; none of %s has results. "
                         "Run run_models_batch.sh / run_models_batch_uploaded.sh first.",
                         ", ".join(files))
         return False
-    missing = [f for f in files if f not in existing]
-    if missing:
-        logging.info("Leaving out models with no output file: %s", ", ".join(missing))
-
-    results = [parse_results_file(f) for f in existing]
 
     # Image counts are the same for every model, so show the first one's.
     first_stats = results[0][1]

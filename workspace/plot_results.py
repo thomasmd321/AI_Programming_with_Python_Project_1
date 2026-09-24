@@ -17,7 +17,7 @@ import os
 import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
 
-from print_model_tables import PET_IMAGE_FILES, parse_results_file
+from print_model_tables import PET_IMAGE_FILES, read_results
 
 # One series colour (all bars/points are the same kind of thing; the model
 # name is on the axis or next to the point), on a light chart surface.
@@ -53,8 +53,8 @@ def _style(ax):
 
 
 def load_results(files=PET_IMAGE_FILES):
-    """Returns [(model, stats)] for the output files that exist, in order."""
-    return [parse_results_file(f) for f in files if os.path.exists(f)]
+    """Returns [(model, stats)] for the usable output files, in order."""
+    return read_results(files)
 
 
 def plot_accuracy(files=PET_IMAGE_FILES, title='Accuracy by model'):
